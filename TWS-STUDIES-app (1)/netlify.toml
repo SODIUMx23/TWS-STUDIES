@@ -1,0 +1,13 @@
+[build]
+  publish = "."
+
+# Make the service worker revalidate so updates propagate
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
