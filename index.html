@@ -353,6 +353,7 @@ canvas{max-width:100%}
       </div>
     </div>
     <div class="nav-item active" data-view="home"><span class="ic">🏠</span><span>Home</span></div>
+    <div class="nav-item" data-view="planner"><span class="ic">🧭</span><span>My Plan</span><span class="badge" id="navPlanBadge"></span></div>
     <div class="nav-item" data-view="learn"><span class="ic">📚</span><span>Syllabus</span><span class="badge" id="navLearnBadge"></span></div>
     <div class="nav-item" data-view="tutor"><span class="ic">🤖</span><span>AI Tutor</span></div>
     <div class="nav-item" data-view="practice"><span class="ic">✏️</span><span>Practice</span></div>
@@ -360,7 +361,10 @@ canvas{max-width:100%}
     <div class="nav-item" data-view="exam"><span class="ic">📝</span><span>Exam Mode</span></div>
     <div class="nav-item" data-view="analysis"><span class="ic">🔍</span><span>Board Analysis</span></div>
     <div class="nav-item" data-view="repeated"><span class="ic">🔥</span><span>Repeated Qs</span></div>
+    <div class="nav-item" data-view="competency"><span class="ic">🧩</span><span>Competency</span><span class="badge" id="navCompBadge">NEW</span></div>
+    <div class="nav-item" data-view="practicals"><span class="ic">🧪</span><span>Practicals</span></div>
     <div class="nav-item" data-view="guide"><span class="ic">🧭</span><span>Study Guides</span></div>
+    <div class="nav-item" data-view="formulas"><span class="ic">📒</span><span>Formula Book</span></div>
     <div class="nav-item" data-view="write"><span class="ic">✍️</span><span>Writing Practice</span></div>
     <div class="nav-item" data-view="doubt"><span class="ic">📓</span><span>Doubt Book</span></div>
     <div class="nav-item" data-view="search"><span class="ic">🔎</span><span>Search</span></div>
@@ -562,6 +566,58 @@ canvas{max-width:100%}
         <input id="searchInput" placeholder="e.g. photosynthesis, quadratic formula, HCF, nephron…" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--text);font-size:15px;font-family:inherit;outline:none">
       </div>
       <div id="searchResults"></div>
+    </section>
+
+
+    <!-- MY PLAN -->
+    <section class="view" id="view-planner">
+      <div class="topbar">
+        <div><h1>🧭 My Study Plan</h1>
+        <div class="sub">Auto-built around your exam date — highest-marks chapters first, 10-day final phase</div></div>
+      </div>
+      <div id="plannerBody"></div>
+    </section>
+
+    <!-- FORMULA BOOK -->
+    <section class="view" id="view-formulas">
+      <div class="topbar">
+        <div><h1>📒 Formula Book</h1>
+        <div class="sub">Every formula, key concept, common mistake & exam cheat-sheet in one place</div></div>
+      </div>
+      <div class="subject-tabs">
+        <div class="chip maths active" data-fb="maths" onclick="fbSetSubj('maths')">🧮 Mathematics</div>
+        <div class="chip science" data-fb="science" onclick="fbSetSubj('science')">🔬 Science</div>
+        <div class="chip fb2-chip" data-fb="cheats" onclick="fbSetSubj('cheats')">⭐ Cheat Sheets</div>
+      </div>
+      <div id="formulaBody"></div>
+    </section>
+
+    <!-- COMPETENCY CORNER -->
+    <section class="view" id="view-competency">
+      <div class="topbar">
+        <div><h1>🧩 Competency Corner</h1>
+        <div class="sub">Assertion–Reason & Case-Study MCQs — the 2025-26 paper's high-scoring pattern</div></div>
+      </div>
+      <div class="subject-tabs">
+        <div class="chip fb2-chip active" data-cb="ar" onclick="compSetTab('ar')">✅ Assertion–Reason</div>
+        <div class="chip fb2-chip" data-cb="cases" onclick="compSetTab('cases')">📖 Case Studies</div>
+      </div>
+      <div id="competencyBody"></div>
+    </section>
+
+    <!-- PRACTICALS -->
+    <section class="view" id="view-practicals">
+      <div class="topbar">
+        <div><h1>🧪 Practicals Kit</h1>
+        <div class="sub">Class-10 experiments with procedure, expected results & viva questions</div></div>
+      </div>
+      <div class="subject-tabs">
+        <div class="chip fb2-chip active" data-pb="all" onclick="prSetCat('all')">All (14)</div>
+        <div class="chip fb2-chip" data-pb="physics" onclick="prSetCat('physics')">⚙️ Physics</div>
+        <div class="chip fb2-chip" data-pb="chemistry" onclick="prSetCat('chemistry')">🧪 Chemistry</div>
+        <div class="chip fb2-chip" data-pb="biology" onclick="prSetCat('biology')">🧬 Biology</div>
+      </div>
+      <div id="practicalBody"></div>
     </section>
 
     <!-- PARENT -->
@@ -4766,6 +4822,1081 @@ if("serviceWorker" in navigator && (location.protocol === "https:" || location.h
     navigator.serviceWorker.register("sw.js").catch(() => {/* offline in sandbox — non-fatal */});
   });
 }
+
+</script>
+
+<script>
+/* ============================================================
+   TWS STUDIES v2 — FLAGSHIP UPGRADE
+   Modules: Planner, Formula Book, Competency Corner,
+   Practicals Kit, Exam Mode v2, Onboarding, TTS
+   ============================================================ */
+
+/* ---------- inject v2 styles ---------- */
+(function(){
+  const css = `
+.fb2-chip.active{background:var(--irid);color:#fff;border-color:transparent;box-shadow:0 10px 26px -8px rgba(0,0,0,.55)}
+.day-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:12px;backdrop-filter:blur(10px)}
+.day-card.today{border-color:rgba(139,92,246,.6);box-shadow:0 0 0 1px rgba(139,92,246,.35),0 16px 40px -20px rgba(139,92,246,.7)}
+.day-card.examday{border-color:rgba(52,211,153,.6)}
+.day-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.day-head .dlabel{font-weight:800;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase}
+.task-row{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:12px;cursor:pointer;transition:.15s;font-size:13.5px}
+.task-row:hover{background:var(--panel2)}
+.task-row.done{opacity:.55}
+.task-row.done .tt{text-decoration:line-through}
+.task-check{width:22px;height:22px;flex-shrink:0;border-radius:7px;border:2px solid var(--muted);display:grid;place-items:center;font-size:12px;transition:.15s}
+.task-row.done .task-check{background:var(--green);border-color:var(--green);color:#06281c}
+.task-row .tico{font-size:15px}
+.task-row .go{margin-left:auto;font-size:10.5px;color:var(--cyan);font-weight:800;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0}
+.countdown-big{font-size:52px;font-weight:800;line-height:1;background:var(--irid);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ctable{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+.ctable th,.ctable td{border:1px solid var(--line);padding:8px 10px;text-align:center}
+.ctable th{background:rgba(139,92,246,.18);font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+.ctable td:first-child,.ctable th:first-child{text-align:left;font-weight:700}
+details.v2d{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden}
+details.v2d>summary{padding:14px 16px;cursor:pointer;font-weight:700;font-size:14px;list-style:none;display:flex;align-items:center;gap:10px}
+details.v2d>summary::-webkit-details-marker{display:none}
+details.v2d>summary::before{content:"▸";color:var(--muted);transition:.2s;font-size:12px}
+details.v2d[open]>summary::before{transform:rotate(90deg)}
+details.v2d>summary:hover{background:var(--panel2)}
+details.v2d .v2body{padding:0 16px 16px}
+.ar-opt{display:flex;gap:11px;align-items:flex-start;padding:11px 13px;border:1px solid var(--line);border-radius:12px;margin-top:8px;cursor:pointer;font-size:13.5px;transition:.15s}
+.ar-opt:hover{border-color:var(--line2);background:var(--panel2)}
+.ar-opt.correct{border-color:var(--green);background:rgba(52,211,153,.12)}
+.ar-opt.ar-opt-wrong{border-color:var(--red);background:rgba(248,113,113,.12)}
+.ar-opt .k{width:26px;height:26px;flex-shrink:0;border-radius:8px;background:var(--panel2);display:grid;place-items:center;font-weight:800;font-size:12px}
+.ar-exp{display:none;margin-top:12px;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.6;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.3)}
+.case-passage{background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.35);border-radius:14px;padding:14px 16px;font-size:13.5px;line-height:1.7;margin:12px 0;white-space:pre-wrap}
+.pstep{display:flex;gap:10px;margin-bottom:8px;font-size:13.5px;line-height:1.55}
+.pstep .n{width:23px;height:23px;flex-shrink:0;border-radius:8px;background:rgba(34,211,238,.18);color:var(--cyan);display:grid;place-items:center;font-weight:800;font-size:11px;margin-top:1px}
+.pkv{display:flex;gap:9px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13px;line-height:1.55}
+.pkv:last-child{border-bottom:none}
+.pkv .pk{flex-shrink:0;width:92px;font-weight:800;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);padding-top:2px}
+#obWrap{position:fixed;inset:0;z-index:120;background:rgba(3,4,10,.82);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto}
+.ob-card{width:100%;max-width:520px;background:linear-gradient(180deg,#1a1638,#0d0a24);border:1px solid rgba(139,92,246,.5);border-radius:24px;padding:32px;box-shadow:0 40px 90px -30px rgba(0,0,0,.9);animation:fade .35s ease}
+.ob-card input,.ob-card select{width:100%;margin:8px 0}
+.exam-hist-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);border-radius:11px;margin-bottom:7px;font-size:13px}
+.miniplan-task{display:flex;align-items:center;gap:9px;padding:7px 4px;font-size:13px;cursor:pointer}
+.miniplan-task .task-check{width:19px;height:19px;border-width:2px;font-size:10px}
+.miniplan-task.done{opacity:.5;text-decoration:line-through}
+`;
+  const st = document.createElement("style");
+  st.textContent = css;
+  document.head.appendChild(st);
+})();
+
+/* ---------- shared v2 state ---------- */
+function v2Ensure(){
+  if(!state.plan) state.plan = { examDate:"", target:90, remindOn:false, reminder:"19:00", firedDate:"", done:{} };
+  if(!state.plan.done) state.plan.done = {};
+  if(!state.examHistory) state.examHistory = [];
+  if(!state.competencySeen) state.competencySeen = false;
+  save();
+}
+v2Ensure();
+
+/* ---------- date helpers ---------- */
+function pad2(n){ return ("0"+n).slice(-2); }
+function isoDate(y,m,day){ return y+"-"+pad2(m)+"-"+pad2(day); }
+function todayISO(){ const d=new Date(); return isoDate(d.getFullYear(),d.getMonth()+1,d.getDate()); }
+function addDaysISO(iso,n){ const d=new Date(iso+"T12:00:00"); d.setDate(d.getDate()+n); return isoDate(d.getFullYear(),d.getMonth()+1,d.getDate()); }
+function diffDays(a,b){ return Math.round((new Date(b+"T12:00:00")-new Date(a+"T12:00:00"))/864e5); }
+function prettyDate(iso){
+  const d=new Date(iso+"T12:00:00");
+  return d.toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"});
+}
+function defaultExamDate(){
+  const now=new Date(); let y=now.getFullYear();
+  let cand=new Date(y,1,15); // 15 Feb
+  if(now>cand) cand=new Date(y+1,1,15);
+  return isoDate(cand.getFullYear(),cand.getMonth()+1,cand.getDate());
+}
+
+/* ============================================================
+   🧭 MY STUDY PLAN
+   ============================================================ */
+const FINAL_PHASE = [
+  {icon:"🧮", t:"Revise ALL Maths formulas & concepts (📒 Formula Book)", go:"formulas"},
+  {icon:"🔬", t:"Revise ALL Science concepts, equations & must-know diagrams", go:"learn"},
+  {icon:"🔥", t:"Master 🔥 Repeated Questions — Mathematics", go:"repeated", sp:{rs:"maths"}},
+  {icon:"🔥", t:"Master 🔥 Repeated Questions — Science", go:"repeated", sp:{rs:"science"}},
+  {icon:"📝", t:"Full Maths mock test + review every mistake", go:"exam", sp:{subj:"maths",n:20}},
+  {icon:"📝", t:"Full Science mock test + review every mistake", go:"exam", sp:{subj:"science",n:20}},
+  {icon:"📝", t:"Mixed mock test, timed like the real paper", go:"exam", sp:{subj:"mixed",n:20}},
+  {icon:"🔴", t:"Fix your weakest chapters from the Knowledge Map", go:"progress"},
+  {icon:"📓", t:"Clear your Doubt Book; skim the Formula Book", go:"doubt"},
+  {icon:"😴", t:"Light revision only. Pack admit card, pens & geometry box. Sleep early 🌙", go:null}
+];
+
+function planChaptersOrdered(){
+  const rank={high:0,med:1,low:2};
+  const out=[];
+  for(const s of ["maths","science"]) for(const ch of CURRICULUM[s].chapters) out.push({s,ch});
+  out.sort((a,b)=> (rank[a.ch.priority]-rank[b.ch.priority]) || ((+b.ch.weight)-(+a.ch.weight)));
+  return out;
+}
+
+function planChapterTasks(){
+  const tasks=[];
+  for(const {s,ch} of planChaptersOrdered()){
+    if(ch.priority==="low"){
+      tasks.push({id:"rev-"+ch.id, icon:"🔵", t:"Quick revise: "+ch.name+" (~"+ch.weight+" marks)", cid:ch.id, s, go:"chapter"});
+    } else {
+      tasks.push({id:"learn-"+ch.id, icon:"📖", t:"Learn: "+ch.name+" — concepts, formulas, mistakes", cid:ch.id, s, go:"chapter"});
+      tasks.push({id:"pract-"+ch.id, icon:"✏️", t:"Practice: "+ch.name+" — MCQs + 🔥 repeated Qs", cid:ch.id, s, go:"practice"});
+    }
+  }
+  return tasks;
+}
+
+function buildPlan(){
+  const exam=(state.plan&&state.plan.examDate)||"";
+  if(!exam) return null;
+  const today=todayISO();
+  const total=diffDays(today,exam);
+  if(total<0) return {past:true, days:[], todayTasks:[], pct:0, total:0};
+  const chapterTasks=planChapterTasks();
+  let studyLen, finalLen;
+  if(total>=10){ finalLen=10; studyLen=total-finalLen; } else { finalLen=0; studyLen=Math.max(total,1); }
+  const perDay=Math.max(1,Math.ceil(chapterTasks.length/studyLen));
+  const days=[];
+  let ti=0;
+  for(let d=0; d<studyLen; d++){
+    const tasks=[];
+    for(let k=0;k<perDay && ti<chapterTasks.length;k++) tasks.push(chapterTasks[ti++]);
+    days.push({date:addDaysISO(today,d), phase:"study", tasks});
+  }
+  // overflow (very short timeline)
+  if(ti<chapterTasks.length){
+    const spill=chapterTasks.slice(ti);
+    spill.forEach((t,i)=>{ const idx=Math.min(days.length-1, Math.floor(i/6)); if(days[idx]) days[idx].tasks.push(t); });
+  }
+  for(let f=0; f<finalLen; f++){
+    const item=FINAL_PHASE[f];
+    days.push({date:addDaysISO(today,studyLen+f), phase:"final", tasks:[{id:"final-"+f, icon:item.icon, t:item.t, cid:null, s:null, go:item.go, sp:item.sp}]});
+  }
+  // exam day
+  days.push({date:exam, phase:"exam", tasks:[{id:"exam-day", icon:"🎯", t:"Exam day — stay calm, read the full paper first. You've got this!", cid:null,s:null,go:null}]});
+  const todayRow=days.find(d=>d.date===today);
+  let done=0,allTasks=0;
+  days.forEach(d=>d.tasks.forEach(t=>{ allTasks++; if(state.plan.done[t.id]) done++; }));
+  return {past:false, days, todayTasks:todayRow?todayRow.tasks:[], pct:allTasks?Math.round(done/allTasks*100):0, total};
+}
+
+function renderPlanner(){
+  const body=$("plannerBody"); if(!body) return;
+  const p=state.plan;
+  if(!p.examDate){
+    body.innerHTML=`<div class="card center" style="padding:44px 28px;max-width:560px;margin:0 auto">
+      <div style="font-size:46px">🧭</div>
+      <h2 style="font-size:21px;margin:12px 0 8px">Let's build your exam plan</h2>
+      <p class="muted small" style="line-height:1.7;max-width:420px;margin:0 auto 18px">Set your board exam start date and target score. I'll auto-generate a day-by-day plan that protects your highest-marks chapters first and leaves a 10-day final revision phase.</p>
+      <label class="small muted">Board exams begin on (approx date is fine)</label>
+      <input type="date" id="planDate" class="btn" style="color:var(--text);margin:10px 0" value="${defaultExamDate()}">
+      <div class="flex" style="justify-content:center">
+        <select id="planTarget" class="btn" style="color:var(--text)">
+          <option value="75">Target 75%</option><option value="85" selected>Target 85%</option>
+          <option value="90">Target 90%</option><option value="95">Target 95%</option>
+        </select>
+        <button class="btn primary" onclick="savePlanSettings(true)">Generate my plan ➜</button>
+      </div></div>`;
+    return;
+  }
+  const plan=buildPlan();
+  if(plan && plan.past){
+    body.innerHTML=`<div class="card center" style="padding:40px"><h2>That exam date has passed</h2>
+      <p class="muted mt">Set your next exam date to regenerate the plan.</p>
+      <input type="date" id="planDate" class="btn" style="color:var(--text);margin:14px 0" value="${defaultExamDate()}">
+      <button class="btn primary" onclick="savePlanSettings(true)">Update date</button></div>`;
+    return;
+  }
+  const remainCount=()=>{ let n=0; plan.days.forEach(d=>d.tasks.forEach(t=>{if(!state.plan.done[t.id])n++;})); return n; };
+  let hist="";
+  plan.days.forEach(d=>{
+    const isToday=d.date===todayISO();
+    const isExam=d.phase==="exam";
+    const label=isToday?"Today":isExam?"🎉 Exam day":d.phase==="final"?"Final phase":prettyDate(d.date);
+    hist+=`<div class="day-card ${isToday?"today":""} ${isExam?"examday":""}">
+      <div class="day-head"><span class="dlabel">${label}</span>
+      ${isToday?`<span class="tag med">${d.tasks.length} tasks</span>`:`<span class="tiny muted">${d.tasks.length} task${d.tasks.length>1?"s":""}</span>`}
+      ${d.phase==="final"?'<span class="tag high">🔁 Revision phase</span>':""}
+      ${isExam?'<span class="tag low">Good luck! 🍀</span>':""}</div>
+      ${d.tasks.map(t=>planTaskRow(t)).join("")}
+    </div>`;
+  });
+  body.innerHTML=`
+  <div class="grid g3 mb" style="gap:14px">
+    <div class="card center">
+      <div class="countdown-big">D-${plan.total}</div>
+      <div class="small muted mt" style="margin-top:8px">days until boards</div>
+      <div class="tiny muted">${prettyDate(p.examDate)} onwards</div>
+    </div>
+    <div class="card center">
+      ${ring(plan.pct,"var(--violet)",104)}
+      <div class="small muted mt" style="margin-top:8px">Plan completed</div>
+    </div>
+    <div class="card">
+      <h3><span class="em">🎯</span> Target ${p.target}%</h3>
+      <div class="small muted" style="line-height:1.7">${remainCount()} tasks remain. High-weightage chapters were scheduled first; the last 10 days are locked for revision &amp; mock tests.</div>
+      <div class="flex mt" style="margin-top:12px;gap:8px">
+        <input type="date" id="planDate" class="btn sm" style="color:var(--text)" value="${esc(p.examDate)}">
+        <button class="btn sm" onclick="savePlanSettings(false)">Update</button>
+      </div>
+    </div>
+  </div>
+  <div class="card mb">
+    <h3><span class="em">🔔</span> Daily study reminder</h3>
+    <div class="flex" style="flex-wrap:wrap">
+      <input type="time" id="planReminder" class="btn sm" style="color:var(--text)" value="${esc(p.reminder||"19:00")}">
+      <button class="btn sm ${p.remindOn?"primary":"ghost"}" onclick="toggleReminder()">${p.remindOn?"🔔 Reminders ON — tap to off":"Enable daily reminder"}</button>
+      <span class="small muted">Works while the app is open or installed (browsers block background alerts)</span>
+    </div>
+  </div>
+  <div class="flex spread mb" style="margin-bottom:14px"><h2 style="font-size:17px">📅 Your day-by-day schedule</h2>
+    <button class="btn sm ghost" onclick="if(confirm('Reset all plan checkmarks?')){state.plan.done={};save();renderPlanner();augmentHomePlan();}">Reset ticks</button>
+  </div>
+  ${hist}`;
+  updatePlanBadge();
+}
+
+function planTaskRow(t){
+  const done=!!state.plan.done[t.id];
+  let action="";
+  if(t.go==="chapter") action=`switchView('learn');openChapter('${t.cid}','${t.s}')`;
+  else if(t.go==="practice") action=`switchView('practice');setupPractice('${t.s}','${t.cid}')`;
+  else if(t.go==="formulas") action=`switchView('formulas')`;
+  else if(t.go==="repeated") action=`setRepeatedSubj('${t.sp.rs}');switchView('repeated')`;
+  else if(t.go==="exam") action=`quickExam('${t.sp.subj}',${t.sp.n})`;
+  else if(t.go==="progress") action=`switchView('progress')`;
+  else if(t.go==="doubt") action=`switchView('doubt')`;
+  else if(t.go==="learn") action=`switchView('learn')`;
+  return `<div class="task-row ${done?"done":""}">
+    <span class="task-check" onclick="event.stopPropagation();togglePlanTask('${t.id}')">${done?"✓":""}</span>
+    <span class="tico">${t.icon}</span>
+    <span class="tt" ${action?`onclick="${action}"`:""} style="${action?"cursor:pointer;flex:1":"flex:1"}">${esc(t.t)}</span>
+    ${action?'<span class="go" onclick="'+action+'">Open ➜</span>':""}
+  </div>`;
+}
+
+function togglePlanTask(id){
+  if(state.plan.done[id]){ delete state.plan.done[id]; }
+  else { state.plan.done[id]=todayISO(); addXP(4,"Plan task completed"); }
+  save();
+  if($("plannerBody")) renderPlanner();
+  augmentHomePlan();
+  updatePlanBadge();
+}
+
+function savePlanSettings(gen){
+  const d=$("planDate"), t=$("planTarget");
+  if(d&&d.value) state.plan.examDate=d.value;
+  if(t&&t.value) state.plan.target=+t.value;
+  state.plan.done={};
+  save();
+  renderPlanner();
+  if(gen) toast("Plan generated 🧭");
+}
+
+function updatePlanBadge(){
+  const b=$("navPlanBadge"); if(!b) return;
+  if(state.plan.examDate){ const plan=buildPlan(); if(plan&&!plan.past){ b.textContent="D-"+plan.total; } }
+}
+
+/* home mini-plan */
+function augmentHomePlan(){
+  const goal=$("todayGoal"); if(!goal) return;
+  let host=$("homePlanMini");
+  if(!host){ host=document.createElement("div"); host.id="homePlanMini"; goal.appendChild(host); }
+  if(!state.plan.examDate){
+    host.innerHTML=`<div class="divider"></div><button class="btn primary sm" onclick="switchView('planner')">🧭 Set up my exam plan</button>`;
+    return;
+  }
+  const plan=buildPlan();
+  if(!plan||plan.past){ host.innerHTML=""; return; }
+  const tasks=plan.todayTasks||[];
+  host.innerHTML=`<div class="divider"></div>
+    <div class="flex spread"><span class="tiny" style="font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan)">🧭 Today's plan · D-${plan.total}</span>
+    <span class="tiny muted">${plan.pct}% of plan done</span></div>
+    ${tasks.slice(0,4).map(t=>`<div class="miniplan-task ${state.plan.done[t.id]?"done":""}">
+      <span class="task-check" onclick="event.stopPropagation();togglePlanTask('${t.id}')">${state.plan.done[t.id]?"✓":""}</span>
+      <span>${t.icon} ${esc(t.t)}</span></div>`).join("")}
+    <button class="btn sm ghost" onclick="switchView('planner')">Full plan ➜</button>`;
+}
+
+/* reminders */
+function toggleReminder(){
+  const t=$("planReminder"); if(t&&t.value) state.plan.reminder=t.value;
+  if(state.plan.remindOn){ state.plan.remindOn=false; save(); renderPlanner(); return; }
+  if(!("Notification" in window)){ toast("Reminders aren't supported on this browser"); return; }
+  Notification.requestPermission().then(perm=>{
+    if(perm==="granted"){ state.plan.remindOn=true; save(); renderPlanner(); new Notification("TWS STUDIES 🔔",{body:"Daily study reminders are on. See you at "+state.plan.reminder+"!"}); }
+    else toast("Allow notifications to enable reminders");
+  });
+}
+setInterval(()=>{
+  try{
+    const p=state.plan; if(!p||!p.remindOn||!("Notification" in window)||Notification.permission!=="granted") return;
+    const now=new Date(), hm=pad2(now.getHours())+":"+pad2(now.getMinutes());
+    const t=todayISO();
+    if(hm===p.reminder && p.firedDate!==t){
+      p.firedDate=t; save();
+      const plan=buildPlan();
+      const n=plan?plan.todayTasks.filter(x=>!p.done[x.id]).length:0;
+      new Notification("Time to study 📚",{body:n?("You have "+n+" study tasks today — open TWS and tick one off!"):"Let's do a quick revision round. 🚀"});
+    }
+  }catch(e){}
+},30000);
+/* ============================================================
+   📒 FORMULA BOOK
+   ============================================================ */
+let fbSubj="maths";
+function fbSetSubj(s){ fbSubj=s; renderFormulaBook(); }
+
+function renderFormulaBook(){
+  const box=$("formulaBody"); if(!box) return;
+  if(fbSubj==="cheats"){ box.innerHTML=renderCheats(); return; }
+  const subj=CURRICULUM[fbSubj];
+  box.innerHTML=subj.chapters.map(ch=>`
+    <details class="v2d" ${chapterPct(ch.id)<50?"":"open"}>
+      <summary>
+        <span style="width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:${subj.color}22;color:${subj.color};font-size:13px;flex-shrink:0">${subj.emoji}</span>
+        <span style="flex:1">${esc(ch.name)}</span>
+        <span class="tiny muted">${ch.formulas.length} formula${ch.formulas.length>1?"s":""}</span>
+      </summary>
+      <div class="v2body">
+        <div class="sec-label">📐 Formulas</div>
+        ${ch.formulas.map(f=>`<div class="formula"><span class="f">${esc(f.f)}</span><span class="n">${esc(f.n)}</span></div>`).join("")}
+        <div class="sec-label">🧠 Key concepts</div>
+        ${ch.concepts.map(c=>`<div class="def"><div class="t">${esc(c.t)}</div><div class="d">${esc(c.d)}</div></div>`).join("")}
+        <div class="sec-label">⚠️ Common mistakes</div>
+        ${ch.mistakes.map(x=>`<div class="mistake">⚠️ ${esc(x)}</div>`).join("")}
+        <div class="flex mt" style="margin-top:12px">
+          <button class="btn primary sm" onclick="switchView('learn');openChapter('${ch.id}','${fbSubj}')">📖 Full chapter</button>
+          <button class="btn sm" onclick="switchView('practice');setupPractice('${fbSubj}','${ch.id}')">✏️ Practice</button>
+          <button class="btn sm ghost" onclick="switchView('tutor');askTutor('${ch.id}')">🤖 Ask tutor</button>
+        </div>
+      </div>
+    </details>`).join("");
+}
+
+function renderCheats(){
+  const trig=`<table class="ctable">
+    <tr><th>Ratio</th><th>0°</th><th>30°</th><th>45°</th><th>60°</th><th>90°</th></tr>
+    <tr><td>sin</td><td>0</td><td>1/2</td><td>1/√2</td><td>√3/2</td><td>1</td></tr>
+    <tr><td>cos</td><td>1</td><td>√3/2</td><td>1/√2</td><td>1/2</td><td>0</td></tr>
+    <tr><td>tan</td><td>0</td><td>1/√3</td><td>1</td><td>√3</td><td>∞</td></tr>
+    <tr><td>cot</td><td>∞</td><td>√3</td><td>1</td><td>1/√3</td><td>0</td></tr>
+    <tr><td>sec</td><td>1</td><td>2/√3</td><td>√2</td><td>2</td><td>∞</td></tr>
+    <tr><td>cosec</td><td>∞</td><td>2</td><td>√2</td><td>2/√3</td><td>1</td></tr>
+  </table>
+  <div class="small muted mt" style="margin-top:10px">💡 sin increases 0→1, cos reverses. cosec = 1/sin, sec = 1/cos, cot = 1/tan.</div>`;
+
+  const mens=`<table class="ctable">
+    <tr><th>Solid</th><th>Curved/Lateral SA</th><th>Total SA</th><th>Volume</th></tr>
+    <tr><td>Cuboid (l,b,h)</td><td>2h(l+b)</td><td>2(lb+bh+lh)</td><td>lbh</td></tr>
+    <tr><td>Cube (a)</td><td>4a²</td><td>6a²</td><td>a³</td></tr>
+    <tr><td>Cylinder (r,h)</td><td>2πrh</td><td>2πr(r+h)</td><td>πr²h</td></tr>
+    <tr><td>Cone (r,l,h)</td><td>πrl</td><td>πr(r+l)</td><td>⅓πr²h</td></tr>
+    <tr><td>Sphere (r)</td><td>4πr²</td><td>4πr²</td><td>4/3 πr³</td></tr>
+    <tr><td>Hemisphere (r)</td><td>2πr²</td><td>3πr²</td><td>2/3 πr³</td></tr>
+    <tr><td>Frustum (r₁,r₂,h,l)</td><td>π(r₁+r₂)l</td><td>π[(r₁+r₂)l+r₁²+r₂²]</td><td>⅓πh(r₁²+r₂²+r₁r₂)</td></tr>
+  </table>
+  <div class="formula mt" style="margin-top:10px"><span class="f">l = √(h² + (r₁−r₂)²)</span><span class="n">Frustum slant height</span></div>`;
+
+  const algebra=`<div class="formula"><span class="f">α+β = −b/a &nbsp;·&nbsp; αβ = c/a</span><span class="n">Quadratic ax²+bx+c</span></div>
+  <div class="formula"><span class="f">x = [−b ± √(b²−4ac)] / 2a</span><span class="n">Quadratic formula</span></div>
+  <div class="formula"><span class="f">D = b²−4ac &nbsp;·&nbsp; D&gt;0 two roots, D=0 equal, D&lt;0 none</span><span class="n">Discriminant</span></div>
+  <div class="formula"><span class="f">aₙ = a+(n−1)d &nbsp;·&nbsp; Sₙ = n/2[2a+(n−1)d]</span><span class="n">Arithmetic progression</span></div>
+  <div class="formula"><span class="f">x = (b₁c₂−b₂c₁)/(a₁b₂−a₂b₁)</span><span class="n">Cross-multiplication</span></div>
+  <div class="formula"><span class="f">d = √[(x₂−x₁)²+(y₂−y₁)²] &nbsp;·&nbsp; midpoint = averages</span><span class="n">Coordinate geometry</span></div>
+  <div class="formula"><span class="f">P(E) = favourable/total &nbsp;·&nbsp; P(not E) = 1−P(E)</span><span class="n">Probability</span></div>
+  <div class="formula"><span class="f">Mode = 3 Median − 2 Mean</span><span class="n">Statistics</span></div>`;
+
+  const series=`<table class="ctable">
+    <tr><th>Order</th><th>Metal</th><th>Symbol</th><th>Extraction</th></tr>
+    <tr><td>1 (most reactive)</td><td>Potassium</td><td>K</td><td rowspan="3">Electrolysis (carbon can't reduce oxides)</td></tr>
+    <tr><td>2</td><td>Sodium</td><td>Na</td></tr>
+    <tr><td>3</td><td>Calcium</td><td>Ca</td></tr>
+    <tr><td>4</td><td>Magnesium</td><td>Mg</td><td rowspan="5">Reduction using carbon (coke)</td></tr>
+    <tr><td>5</td><td>Aluminium</td><td>Al</td></tr>
+    <tr><td>6</td><td>Zinc</td><td>Zn</td></tr>
+    <tr><td>7</td><td>Iron</td><td>Fe</td></tr>
+    <tr><td>8</td><td>Lead</td><td>Pb</td></tr>
+    <tr><td>—</td><td>(Hydrogen)</td><td>H</td><td>reference, not a metal</td></tr>
+    <tr><td>9</td><td>Copper</td><td>Cu</td><td rowspan="2">Heat the sulphide/ore in air</td></tr>
+    <tr><td>10</td><td>Mercury</td><td>Hg</td></tr>
+    <tr><td>11</td><td>Silver</td><td>Ag</td><td rowspan="2">Found free in nature</td></tr>
+    <tr><td>12 (least)</td><td>Gold</td><td>Au</td></tr>
+  </table>`;
+
+  const salts=`<table class="ctable">
+    <tr><th>Common name</th><th>Chemical</th><th>Formula</th><th>One use</th></tr>
+    <tr><td>Common salt</td><td>Sodium chloride</td><td>NaCl</td><td>Cooking / making NaOH</td></tr>
+    <tr><td>Caustic soda</td><td>Sodium hydroxide</td><td>NaOH</td><td>Soaps, degreasing</td></tr>
+    <tr><td>Baking soda</td><td>Sodium hydrogencarbonate</td><td>NaHCO₃</td><td>Antacid, baking</td></tr>
+    <tr><td>Washing soda</td><td>Sodium carbonate decahydrate</td><td>Na₂CO₃·10H₂O</td><td>Softening hard water</td></tr>
+    <tr><td>Bleaching powder</td><td>Calcium oxychloride</td><td>CaOCl₂</td><td>Disinfecting water</td></tr>
+    <tr><td>Quicklime</td><td>Calcium oxide</td><td>CaO</td><td>Cement / slaking</td></tr>
+    <tr><td>Slaked lime</td><td>Calcium hydroxide</td><td>Ca(OH)₂</td><td>Whitewashing</td></tr>
+    <tr><td>Limestone / marble</td><td>Calcium carbonate</td><td>CaCO₃</td><td>Building material</td></tr>
+    <tr><td>Plaster of Paris</td><td>Calcium sulphate hemihydrate</td><td>CaSO₄·½H₂O</td><td>Setting fractures</td></tr>
+    <tr><td>Gypsum</td><td>Calcium sulphate dihydrate</td><td>CaSO₄·2H₂O</td><td>Makes POP on heating</td></tr>
+    <tr><td>Vinegar</td><td>Ethanoic acid (dilute)</td><td>CH₃COOH</td><td>Preservative</td></tr>
+    <tr><td>Alcohol</td><td>Ethanol</td><td>C₂H₅OH</td><td>Solvent / fuel</td></tr>
+  </table>`;
+
+  const elec=`<table class="ctable">
+    <tr><th>Quantity</th><th>Symbol</th><th>Unit</th></tr>
+    <tr><td>Charge</td><td>Q</td><td>coulomb (C)</td></tr>
+    <tr><td>Current</td><td>I</td><td>ampere (A)</td></tr>
+    <tr><td>Potential difference</td><td>V</td><td>volt (V)</td></tr>
+    <tr><td>Resistance</td><td>R</td><td>ohm (Ω)</td></tr>
+    <tr><td>Resistivity</td><td>ρ</td><td>Ω·m</td></tr>
+    <tr><td>Power</td><td>P</td><td>watt (W)</td></tr>
+    <tr><td>Electrical energy</td><td>E</td><td>joule / kWh</td></tr>
+  </table>
+  <div class="formula mt" style="margin-top:10px"><span class="f">V = IR · R = ρL/A</span><span class="n">Ohm's law &amp; resistivity</span></div>
+  <div class="formula"><span class="f">P = VI = I²R = V²/R</span><span class="n">Power (all forms)</span></div>
+  <div class="formula"><span class="f">H = I²Rt · 1 kWh = 3.6×10⁶ J</span><span class="n">Heating &amp; unit</span></div>
+  <div class="formula"><span class="f">Series R = R₁+R₂ &nbsp;·&nbsp; Parallel 1/R = 1/R₁+1/R₂</span><span class="n">Circuits</span></div>`;
+
+  const optics=`<div class="def"><div class="t">Sign convention (Cartesian — "incident light from left")</div>
+    <div class="d">All distances measured from pole/optical centre. Distances in incident-light direction → positive; opposite → negative. Heights upward positive, downward negative. <b>Real object distance u is always negative.</b></div></div>
+  <table class="ctable">
+    <tr><th></th><th>Mirror</th><th>Lens</th></tr>
+    <tr><td>Formula</td><td>1/f = 1/v + 1/u</td><td>1/f = 1/v − 1/u</td></tr>
+    <tr><td>Magnification</td><td>m = −v/u = h′/h</td><td>m = v/u = h′/h</td></tr>
+    <tr><td>Power</td><td>—</td><td>P = 1/f (f in metres), unit dioptre (D)</td></tr>
+    <tr><td>Refractive index</td><td colspan="2">n = sin i / sin r = c/v</td></tr>
+  </table>
+  <div class="small muted mt" style="margin-top:10px">Convex mirror = diverging (rear-view, wide field). Convex lens = converging. Concave mirror converges; concave lens diverges.</div>`;
+
+  const ph=`<table class="ctable">
+    <tr><th>Indicator</th><th>Acid</th><th>Neutral</th><th>Base</th></tr>
+    <tr><td>Blue litmus</td><td>turns red</td><td>no change</td><td>no change (stays blue)</td></tr>
+    <tr><td>Red litmus</td><td>no change</td><td>no change</td><td>turns blue</td></tr>
+    <tr><td>Phenolphthalein</td><td>colourless</td><td>colourless</td><td>pink</td></tr>
+    <tr><td>Methyl orange</td><td>red</td><td>orange</td><td>yellow</td></tr>
+  </table>
+  <div class="formula mt" style="margin-top:10px"><span class="f">pH &lt; 7 acidic · pH = 7 neutral · pH &gt; 7 basic</span><span class="n">0–14 scale</span></div>
+  <div class="small muted">Lower pH = stronger acid. Tooth decay starts below pH 5.5. 🔑</div>`;
+
+  const sheets=[
+    {ic:"📐",t:"Standard-angle trigonometry table",h:trig},
+    {ic:"🧊",t:"Mensuration — surface areas & volumes",h:mens},
+    {ic:"➗",t:"Algebra essentials (one glance)",h:algebra},
+    {ic:"🔩",t:"Reactivity series & how metals are extracted",h:series},
+    {ic:"🧂",t:"Common salts & chemicals with formulae",h:salts},
+    {ic:"⚡",t:"Electricity — units & formulae",h:elec},
+    {ic:"🪞",t:"Ray optics — sign conventions",h:optics},
+    {ic:"🌈",t:"pH scale & indicator colours",h:ph}
+  ];
+  return `<div class="card mb"><div class="small muted" style="line-height:1.7">Exam-hall quick-reference sheets. Everything here is straight from your syllabus — read one sheet every morning with your chai, and these become free marks. ☕</div></div>`+
+    sheets.map(s=>`<details class="v2d"><summary><span style="font-size:17px">${s.ic}</span><span style="flex:1">${s.t}</span></summary><div class="v2body">${s.h}</div></details>`).join("");
+}
+/* ============================================================
+   🧩 COMPETENCY CORNER — Assertion-Reason + Case Studies
+   ans codes: A = both true, R explains A
+              B = both true, R does NOT explain A
+              C = A true, R false
+              D = A false, R true
+   ============================================================ */
+const AR_OPTIONS=[
+  "Both A and R are true and R is the correct explanation of A.",
+  "Both A and R are true but R is NOT the correct explanation of A.",
+  "A is true but R is false.",
+  "A is false but R is true."
+];
+const ASSERTION=[
+  /* ---- MATHS ---- */
+  {s:"maths",c:"real-numbers",a:"√2 is an irrational number.",r:"A number whose decimal expansion is non-terminating and non-recurring is irrational.",ans:0,exp:"√2 is non-terminating non-recurring, and that is exactly the definition of an irrational number — R directly explains A."},
+  {s:"maths",c:"real-numbers",a:"HCF(96, 404) = 4.",r:"The HCF of two numbers is the product of the smallest powers of the common prime factors.",ans:0,exp:"96=2⁵×3, 404=2²×101; smallest common power is 2²=4. R is the rule that gives the answer."},
+  {s:"maths",c:"polynomials",a:"For x² − 5x + 6, the sum of the zeroes is 5.",r:"For ax²+bx+c, the sum of the zeroes is −b/a.",ans:0,exp:"−b/a = −(−5)/1 = 5. The statement follows directly from the relation in R."},
+  {s:"maths",c:"pair-linear-equations",a:"The lines x+2y−4=0 and 2x+4y−12=0 are parallel.",r:"If a₁/a₂ = b₁/b₂ ≠ c₁/c₂, the pair of lines is inconsistent (parallel, no solution).",ans:0,exp:"1/2 = 2/4 = 1/2, but (−4)/(−12) = 1/3, so ratios of a,b differ from c — parallel, no solution."},
+  {s:"maths",c:"quadratic-equations",a:"2x² + kx + 3 = 0 has equal roots when k = ±2√6.",r:"A quadratic has equal roots exactly when its discriminant D = 0.",ans:0,exp:"D = k²−24 = 0 gives k=±2√6. R is the principle behind it."},
+  {s:"maths",c:"quadratic-equations",a:"The quadratic x² + 1 = 0 has no real roots.",r:"Its discriminant is −4, which is negative.",ans:0,exp:"D = 0−4 = −1×4×1 = −4 < 0; a negative discriminant means no real roots."},
+  {s:"maths",c:"arithmetic-progressions",a:"The 10th term of the AP 2, 7, 12, … is 47.",r:"The nth term of an AP is aₙ = a + (n−1)d.",ans:0,exp:"a=2, d=5: a₁₀ = 2 + 9×5 = 47, computed with the formula in R."},
+  {s:"maths",c:"triangles",a:"If corresponding sides of two similar triangles are in ratio 3:4, their areas are in ratio 9:16.",r:"The ratio of the areas of two similar triangles equals the square of the ratio of their corresponding sides.",ans:0,exp:"(3/4)² = 9/16 — R is precisely the theorem used."},
+  {s:"maths",c:"triangles",a:"Pythagoras' theorem can be applied to any triangle.",r:"In a right triangle, the square of the hypotenuse equals the sum of the squares of the other two sides.",ans:3,exp:"A is false (only right triangles); R states the true theorem."},
+  {s:"maths",c:"coordinate-geometry",a:"The distance between (3,4) and (7,1) is 5 units.",r:"Distance between two points is √[(x₂−x₁)² + (y₂−y₁)²].",ans:0,exp:"√[(7−3)²+(1−4)²] = √[16+9] = 5 — the formula in R gives the result."},
+  {s:"maths",c:"trigonometry",a:"sin²θ + cos²θ = 1 for every angle θ.",r:"It is the fundamental Pythagorean identity obtained from the right-triangle ratios.",ans:0,exp:"Dividing the sides relation by hypotenuse² gives sin²+cos²=1; R explains why."},
+  {s:"maths",c:"trigonometry",a:"tan 30° = √3.",r:"tan 60° = √3.",ans:3,exp:"A is false (tan 30° = 1/√3); R is a true fact about tan 60°."},
+  {s:"maths",c:"trigonometry-applications",a:"From 30 m away, a tower with 60° elevation has height 30√3 m.",r:"tan θ = height of object / horizontal distance from observer.",ans:0,exp:"h = 30 tan 60° = 30√3 using the relation stated in R."},
+  {s:"maths",c:"circles",a:"The tangent at any point of a circle is perpendicular to the radius through that point.",r:"A tangent touches the circle at exactly one point.",ans:1,exp:"Both statements are true, but 'touches at one point' does not explain the perpendicularity — the explanation comes from the radius being the shortest distance to the line."},
+  {s:"maths",c:"areas-related-circles",a:"The area of a sector with angle θ is (θ/360°) × πr².",r:"A sector is a fraction θ/360 of the complete circle.",ans:0,exp:"The area is the same fraction of πr² as θ is of 360° — R explains A."},
+  {s:"maths",c:"surface-areas-volumes",a:"When a solid is melted and recast into another shape, its volume stays the same.",r:"Melting changes only the shape, not the amount of material.",ans:0,exp:"Conservation of material = conservation of volume; R is the reason."},
+  {s:"maths",c:"statistics",a:"Mode = 3 Median − 2 Mean.",r:"It is the empirical relation between the three measures of central tendency.",ans:0,exp:"The empirical formula is the rule itself, so R explains A."},
+  {s:"maths",c:"probability",a:"The probability of drawing a king from 52 cards is 1/13.",r:"There are 4 kings in a deck of 52 cards.",ans:0,exp:"4/52 = 1/13 — counting in R directly gives A."},
+  {s:"maths",c:"probability",a:"The probability of an event can be 1.2.",r:"For any event E, 0 ≤ P(E) ≤ 1.",ans:3,exp:"Probability can never exceed 1, so A is false; R states the true bound."},
+
+  /* ---- SCIENCE ---- */
+  {s:"science",c:"chemical-reactions",a:"Respiration is considered an exothermic reaction.",r:"Respiration releases energy (heat/ATP) by breaking down glucose.",ans:0,exp:"Reactions that release energy are exothermic — R explains the classification."},
+  {s:"science",c:"chemical-reactions",a:"When an iron nail is dipped in CuSO₄ solution, the blue colour fades to green.",r:"Iron, being more reactive, displaces copper and forms green FeSO₄.",ans:0,exp:"Fe + CuSO₄ → FeSO₄(green) + Cu; the displacement in R causes the colour change in A."},
+  {s:"science",c:"acids-bases-salts",a:"While diluting, acid should be added to water, never water to concentrated acid.",r:"Dilution of a strong acid is highly exothermic and can cause splashing if reversed.",ans:0,exp:"The exothermic danger described in R is exactly why the rule in A exists."},
+  {s:"science",c:"metals-nonmetals",a:"Ionic compounds conduct electricity in molten state or aqueous solution.",r:"In those states, ions become free to move and carry electric current.",ans:0,exp:"Free mobile ions (R) are the cause of conduction (A)."},
+  {s:"science",c:"metals-nonmetals",a:"Aluminium is extracted by electrolytic reduction, not by heating with carbon.",r:"Aluminium is more reactive than carbon, so carbon cannot remove oxygen from Al₂O₃.",ans:0,exp:"Position above carbon in the reactivity series (R) forces electrolysis (A)."},
+  {s:"science",c:"carbon-compounds",a:"Soaps do not work well in hard water but detergents do.",r:"Hard water's Ca²⁺ and Mg²⁺ ions form an insoluble scum (precipitate) with soap.",ans:0,exp:"Scum formation (R) wastes soap, which is why soaps fail (A)."},
+  {s:"science",c:"life-processes",a:"Arteries carry blood away from the heart and veins towards it.",r:"Arteries have thick elastic walls to bear high pressure from the pumping heart.",ans:1,exp:"Both are true facts, but wall structure does not explain the direction-of-flow definition."},
+  {s:"science",c:"life-processes",a:"The rate of breathing is faster in aquatic animals than in terrestrial ones.",r:"The amount of dissolved oxygen in water is much lower than in air.",ans:0,exp:"Less oxygen available per breath (R) forces faster breathing (A)."},
+  {s:"science",c:"control-coordination",a:"A shoot bends towards light.",r:"Auxin accumulates on the shaded side, making those cells elongate more.",ans:0,exp:"The unequal growth caused by auxin (R) is the mechanism behind phototropism (A)."},
+  {s:"science",c:"reproduction",a:"Binary fission in Amoeba is a form of asexual reproduction.",r:"It involves a single parent and no gametes or fertilisation.",ans:0,exp:"Single parent with no gametes (R) is what defines the reproduction as asexual (A)."},
+  {s:"science",c:"heredity",a:"In humans, the father's sperm determines the sex of the child.",r:"Males are XY and produce two kinds of sperm (X and Y), while females produce only X eggs.",ans:0,exp:"The Y-bearing sperm (R) is exactly what makes a male child, explaining A."},
+  {s:"science",c:"our-environment",a:"Food chains usually have only 3–4 trophic levels.",r:"Only about 10% of energy passes to the next trophic level.",ans:0,exp:"Energy runs out after a few levels because of the 10% law (R)."},
+  {s:"science",c:"light-reflection-refraction",a:"Convex mirrors are used as rear-view mirrors in vehicles.",r:"Convex mirrors give an erect, diminished image with a wider field of view.",ans:0,exp:"The wide, upright view (R) is the reason for the use (A)."},
+  {s:"science",c:"light-reflection-refraction",a:"The power of a lens of focal length 25 cm is 4 D.",r:"Power of a lens is P = 1/f where f is measured in metres.",ans:0,exp:"f=0.25 m → P=1/0.25=4 D using the formula in R."},
+  {s:"science",c:"human-eye-colourful-world",a:"Myopia is corrected with a concave (diverging) lens.",r:"In myopia the image is formed in front of the retina and a diverging lens pushes it back.",ans:0,exp:"The defect described in R explains why that lens (A) is prescribed."},
+  {s:"science",c:"human-eye-colourful-world",a:"The sky appears blue.",r:"Blue light has the longest wavelength in the visible spectrum.",ans:2,exp:"A is true but R is false: blue/violet light has one of the SHORTEST wavelengths, which scatters most."},
+  {s:"science",c:"electricity",a:"Household appliances are connected in parallel.",r:"In parallel each appliance gets the same voltage and can be switched independently.",ans:0,exp:"The equal-voltage, independent-operation property (R) is the reason for parallel wiring (A)."},
+  {s:"science",c:"electricity",a:"A 60 W bulb on a 240 V line draws 0.25 A.",r:"Electric power is P = VI.",ans:0,exp:"I = P/V = 60/240 = 0.25 A, computed from P=VI in R."},
+  {s:"science",c:"magnetic-effects",a:"Fleming's left-hand rule is used in an electric generator.",r:"The left-hand rule gives the direction of force on a current-carrying conductor (motor principle).",ans:3,exp:"A is false — generators use the RIGHT-hand rule; R correctly states the left-hand rule's actual use."},
+  {s:"science",c:"magnetic-effects",a:"The field inside a current-carrying solenoid is uniform.",r:"Field lines inside a long solenoid are parallel and closely spaced.",ans:0,exp:"Parallel equally-spaced lines (R) are the meaning of a uniform field (A)."}
+];
+
+/* Case studies: {s,c,title,passage,qs:[{q,opts,a,exp}]} */
+const CASES=[
+  {s:"maths",c:"real-numbers",title:"🎪 Stalls at the school fête",
+   passage:"For the annual fête, 96 pens and 404 notebooks are to be distributed so that every student helper gets the SAME number of pens and the SAME number of notebooks, with none left over.",
+   qs:[
+    {q:"What is the maximum number of students that can receive supplies?",opts:["4","8","12","96"],a:0,exp:"HCF(96,404) = 4 — the largest number dividing both."},
+    {q:"96 = 2⁵ × 3 and 404 = 2² × 101. Their HCF is:",opts:["2","4","101","96"],a:1,exp:"Smallest power of the only common prime: 2² = 4."},
+    {q:"Using HCF × LCM = product, the LCM is:",opts:["9696","4848","38784","404"],a:0,exp:"LCM = 96×404/4 = 9696."}]},
+  {s:"maths",c:"quadratic-equations",title:"🚂 The delayed train",
+   passage:"An express train covers 360 km at a uniform speed. If its speed had been 5 km/h more, the journey would have taken 1 hour less.",
+   qs:[
+    {q:"Taking usual speed as x km/h, the equation formed is:",opts:["360/x − 360/(x+5) = 1","360/(x+5) − 360/x = 1","x² + 5x − 360 = 0","360x = 5"],a:0,exp:"Time difference = original time − faster time = 1 hour."},
+    {q:"The quadratic simplifies to:",opts:["x²+5x−1800=0","x²−5x−1800=0","x²+5x+1800=0","x²+360x−5=0"],a:0,exp:"360[(x+5)−x]/[x(x+5)] = 1 → x²+5x−1800=0."},
+    {q:"The train's usual speed is:",opts:["40 km/h","36 km/h","45 km/h","50 km/h"],a:0,exp:"x = (−5+√(25+7200))/2 = (−5+85)/2 = 40 km/h."}]},
+  {s:"maths",c:"arithmetic-progressions",title:"🪑 Chairs in the auditorium",
+   passage:"An auditorium has 10 rows. The first row has 12 chairs, the second 14, the third 16, and so on — each row gains exactly 2 chairs.",
+   qs:[
+    {q:"Number of chairs in the 10th row is:",opts:["28","30","32","26"],a:1,exp:"a₁₀ = 12 + 9×2 = 30."},
+    {q:"Total chairs in all 10 rows is:",opts:["210","200","220","190"],a:0,exp:"S₁₀ = 10/2 [2×12 + 9×2] = 5×42 = 210."},
+    {q:"The common difference of this AP is:",opts:["12","2","10","21"],a:1,exp:"Each row adds 2 chairs, so d = 2."}]},
+  {s:"maths",c:"triangles",title:"🌳 Shadow maths",
+   passage:"A pole 6 m high casts a shadow 8 m long. At the same time, a nearby tower casts a shadow 40 m long. The sun's rays are parallel, so the triangles formed are similar.",
+   qs:[
+    {q:"The height of the tower is:",opts:["30 m","32 m","24 m","48 m"],a:0,exp:"h/40 = 6/8 → h = 30 m."},
+    {q:"The criterion of similarity used is:",opts:["SSS","SAS","AA (equal sun angle & right angles)","ASA"],a:2,exp:"Both have a right angle and the same angle of the sun's rays → AA."},
+    {q:"If two similar triangles have side ratio 2:5, their area ratio is:",opts:["2:5","4:25","4:10","8:125"],a:1,exp:"Area ratio = (2/5)² = 4:25."}]},
+  {s:"maths",c:"trigonometry-applications",title:"🗼 Two observers, one tower",
+   passage:"From a point P on the ground, the angle of elevation of a tower's top is 30°. From point Q, 30 m closer to the tower, the angle is 60°. (Take √3 = 1.73)",
+   qs:[
+    {q:"If the tower height is h and Q is x metres from its foot, then:",opts:["h = x√3","h = x/√3","h = 2x","x = h√3"],a:0,exp:"At Q, tan 60° = h/x → h = x√3."},
+    {q:"Using point P (x+30 away), the relation is h = (x+30)/√3. Solving gives x =:",opts:["15 m","30 m","10 m","20 m"],a:0,exp:"x√3 = (x+30)/√3 → 3x = x+30 → x = 15 m."},
+    {q:"The height of the tower is:",opts:["15√3 m","15 m","30√3 m","30 m"],a:0,exp:"h = 15√3 m ≈ 26 m."}]},
+  {s:"maths",c:"circles",title:"🎯 Tangents from a point",
+   passage:"From a point T outside a circle with centre O, two tangents TP and TQ touch the circle at P and Q. The radii OP and OQ are joined.",
+   qs:[
+    {q:"Lengths TP and TQ are:",opts:["equal","different","perpendicular","parallel"],a:0,exp:"Tangents from an external point are equal."},
+    {q:"Angles ∠OPT and ∠OQT are each:",opts:["60°","90°","45°","180°"],a:1,exp:"Radius is perpendicular to tangent at contact."},
+    {q:"If ∠PTQ = 60°, then ∠POQ equals:",opts:["100°","120°","60°","90°"],a:1,exp:"Angle sum of quadrilateral OPTQ: 360−90−90−60 = 120°."}]},
+  {s:"maths",c:"statistics",title:"📊 Weekly wages",
+   passage:"A factory records daily wages of 50 workers; the modal class is ₹500–600 with frequency f₁=20, the class before has f₀=12, after has f₂=15, and class size h=100, l=500.",
+   qs:[
+    {q:"The modal class is identified by:",opts:["lowest frequency","highest frequency","middle class","class with largest width"],a:1,exp:"Mode lies in the class with maximum frequency."},
+    {q:"Mode = l + [(f₁−f₀)/(2f₁−f₀−f₂)] × h gives:",opts:["≈ ₹561.5","₹550","₹600","₹500"],a:0,exp:"500 + [8/(40−12−15)]×100 = 500 + (8/13)×100 ≈ ₹561.5."},
+    {q:"Mode and mean are also related empirically as:",opts:["Mode = 3 Median − 2 Mean","Mode = 2 Mean − 3 Median","Mode = Mean + Median","Mode = 3 Mean − 2 Median"],a:0,exp:"Empirical relation: Mode = 3 Median − 2 Mean."}]},
+  {s:"maths",c:"probability",title:"🎲 The lucky-draw board",
+   passage:"At a game stall, cards numbered 1 to 25 are shuffled in a box and one is drawn at random.",
+   qs:[
+    {q:"Probability the number is even:",opts:["12/25","13/25","1/2","11/25"],a:0,exp:"12 even numbers (2,4,…,24) out of 25."},
+    {q:"Probability the number is a multiple of 5:",opts:["1/5","4/25","1/4","5/25"],a:0,exp:"5,10,15,20,25 = 5 numbers → 5/25 = 1/5."},
+    {q:"Probability the number is a two-digit number:",opts:["16/25","15/25","0.6","9/25"],a:0,exp:"10 to 25 = 16 numbers → 16/25."}]},
+  {s:"science",c:"chemical-reactions",title:"⚗️ The blue-beaker test",
+   passage:"A student dips a clean iron nail in blue copper sulphate solution. After 20 minutes the solution turns green and a reddish-brown deposit coats the nail.",
+   qs:[
+    {q:"The reddish-brown deposit is:",opts:["iron oxide","copper metal","iron sulphate","rust"],a:1,exp:"Displaced copper metal deposits on the nail."},
+    {q:"The green colour is due to formation of:",opts:["CuSO₄","FeSO₄","H₂SO₄","Fe₂O₃"],a:1,exp:"Iron forms light-green ferrous sulphate."},
+    {q:"The reaction type is:",opts:["combination","decomposition","displacement","double displacement"],a:2,exp:"Fe (more reactive) displaces Cu from its salt."}]},
+  {s:"science",c:"life-processes",title:"🫘 The kidney's million filters",
+   passage:"Each human kidney contains about a million nephrons. Blood is filtered under pressure in the glomerulus; the filtrate then travels through the tubule where glucose, salts and most water are reabsorbed, leaving urine.",
+   qs:[
+    {q:"The basic filtration unit of the kidney is the:",opts:["alveolus","nephron","neuron","ureter"],a:1,exp:"Nephrons are the functional/filtration units."},
+    {q:"Useful substances like glucose return to the blood by:",opts:["filtration","selective reabsorption","transpiration","osmosis only"],a:1,exp:"Reabsorption along the tubule recovers useful materials."},
+    {q:"The cup-shaped structure that collects the glomerular filtrate is:",opts:["Bowman's capsule","collecting duct","bladder","urethra"],a:0,exp:"Bowman's capsule cups the glomerulus."}]},
+  {s:"science",c:"light-reflection-refraction",title:"🔍 Lens numerical",
+   passage:"A convex lens forms a real, inverted image. An object is placed 30 cm from the lens and the image forms 60 cm on the other side.",
+   qs:[
+    {q:"Using 1/f = 1/v − 1/u with sign convention, f equals:",opts:["20 cm","−20 cm","45 cm","15 cm"],a:0,exp:"u=−30, v=+60: 1/f = 1/60 − 1/(−30) = 1/60+2/60 = 3/60 → f = 20 cm."},
+    {q:"Magnification m = v/u is:",opts:["−2","+2","−1/2","+1/2"],a:0,exp:"m = 60/(−30) = −2 (negative = inverted)."},
+    {q:"The power of this lens is:",opts:["+5 D","−5 D","+2 D","+0.05 D"],a:0,exp:"P = 1/0.20 = +5 D (convex → positive)."}]},
+  {s:"science",c:"electricity",title:"🔌 Circuit challenge",
+   passage:"Two resistors R₁ = 3 Ω and R₂ = 6 Ω are first connected in series, then the same pair in parallel across a 6 V battery.",
+   qs:[
+    {q:"Equivalent resistance in series is:",opts:["9 Ω","2 Ω","18 Ω","0.5 Ω"],a:0,exp:"Series: 3+6 = 9 Ω."},
+    {q:"Equivalent resistance in parallel is:",opts:["9 Ω","2 Ω","18 Ω","0.5 Ω"],a:1,exp:"1/R = 1/3+1/6 = 1/2 → R = 2 Ω."},
+    {q:"Current from the battery in the parallel arrangement:",opts:["3 A","2/3 A","1 A","6 A"],a:0,exp:"I = V/R = 6/2 = 3 A."}]},
+  {s:"science",c:"heredity",title:"🌱 Mendel's tall × dwarf cross",
+   passage:"A pure tall (TT) pea plant is crossed with a pure dwarf (tt) pea plant. All F₁ plants are tall. These F₁ plants are then self-pollinated.",
+   qs:[
+    {q:"Genotype of every F₁ plant is:",opts:["TT","Tt","tt","TtTt"],a:1,exp:"Each gets T from one parent, t from the other → Tt."},
+    {q:"F₂ phenotypic ratio after selfing F₁ is:",opts:["3 tall : 1 dwarf","1:2:1","9:3:3:1","1:1"],a:0,exp:"Monohybrid phenotypic ratio = 3:1."},
+    {q:"F₂ genotypic ratio is:",opts:["3:1","1 TT : 2 Tt : 1 tt","9:3:3:1","all Tt"],a:1,exp:"1:2:1 at the gene level."}]}
+];
+
+let compTab="ar";
+let openCase=-1;
+function compSetTab(t){ compTab=t; renderCompetency(); }
+
+function renderCompetency(){
+  const box=$("competencyBody"); if(!box) return;
+  if(compTab==="ar"){
+    box.innerHTML=`<div class="card mb"><div class="small muted" style="line-height:1.7"><b>Assertion–Reason</b> questions are guaranteed in the 2025-26 paper style. Read A and R separately: is A true? is R true? Then ask — does R actually EXPLAIN A? (That second step is where most marks are lost.)</div></div>`+
+    ASSERTION.map((it,i)=>{
+      const ch=findChapter(it.c,it.s);
+      return `<div class="q-card mb ar-card">
+        <div class="flex spread"><span class="tag ${it.s}">${CURRICULUM[it.s].emoji} ${esc(ch?ch.name:it.c)}</span><span class="tiny muted">#${i+1} / ${ASSERTION.length}</span></div>
+        <div style="margin:12px 0 4px;font-size:14px"><b>Assertion:</b> ${esc(it.a)}</div>
+        <div style="font-size:14px"><b>Reason:</b> ${esc(it.r)}</div>
+        <div style="margin-top:8px">
+          ${AR_OPTIONS.map((o,k)=>`<div class="ar-opt" onclick="answerAR(this,${i},${k})"><span class="k">${"ABCD"[k]}</span><span>${esc(o)}</span></div>`).join("")}
+        </div>
+        <div class="ar-exp">${it.ans===0||it.ans===1?"✅":"📘"} <b>Answer: ${"ABCD"[it.ans]}.</b> ${esc(it.exp)}</div>
+      </div>`;
+    }).join("");
+  } else {
+    box.innerHTML=`<div class="card mb"><div class="small muted" style="line-height:1.7"><b>Case-based questions</b> test whether you can read a real situation, pull out the right concept, and apply it — exactly the competency focus of the new pattern. Read the passage, then answer its MCQs.</div></div>`+
+    CASES.map((cs,i)=>{
+      const ch=findChapter(cs.c,cs.s);
+      const open=openCase===i;
+      return `<div class="q-card mb">
+        <div class="flex spread">
+          <div><span class="tag ${cs.s}">${CURRICULUM[cs.s].emoji} ${esc(ch?ch.name:cs.c)}</span>
+          <span style="font-weight:800;font-size:14.5px;margin-left:8px">${esc(cs.title)}</span></div>
+          <button class="btn sm ${open?"ghost":"primary"}" onclick="startCase(${i})">${open?"Close":"Start ▸"}</button>
+        </div>
+        ${open?`<div class="case-passage">${esc(cs.passage)}</div><div id="caseQs-${i}">${cs.qs.map((q,k)=>caseQHTML(i,k,q)).join("")}</div>
+          <div class="small muted" id="caseScore-${i}"></div>`:""}
+      </div>`;
+    }).join("");
+  }
+}
+function caseQHTML(ci,qi,q){
+  return `<div style="margin-top:14px">
+    <div style="font-weight:700;font-size:14px">${qi+1}. ${esc(q.q)}</div>
+    ${q.opts.map((o,k)=>`<div class="ar-opt" onclick="answerCaseQ(this,${ci},${qi},${k})"><span class="k">${"ABCD"[k]}</span><span>${esc(o)}</span></div>`).join("")}
+    <div class="ar-exp" id="cexp-${ci}-${qi}">📘 ${esc(q.exp)}</div>
+  </div>`;
+}
+function startCase(i){ openCase=(openCase===i?-1:i); renderCompetency(); }
+function answerAR(btn,i,choice){
+  const it=ASSERTION[i]; const card=btn.closest(".ar-card");
+  if(card.dataset.done) return; card.dataset.done="1";
+  const opts=card.querySelectorAll(".ar-opt");
+  opts.forEach((o,k)=>{ o.style.pointerEvents="none"; if(k===it.ans) o.classList.add("correct"); });
+  if(choice!==it.ans) btn.classList.add("ar-opt-wrong");
+  const r=m(it.c); r.attempted++;
+  if(choice===it.ans){ r.correct++; addXP(8,"Assertion–Reason"); }
+  save(); card.querySelector(".ar-exp").style.display="block";
+}
+function answerCaseQ(btn,ci,qi,choice){
+  const q=CASES[ci].qs[qi]; const wrap=btn.parentElement;
+  if(wrap.dataset.done) return; wrap.dataset.done="1";
+  const opts=wrap.querySelectorAll(".ar-opt");
+  opts.forEach((o,k)=>{ o.style.pointerEvents="none"; if(k===q.a) o.classList.add("correct"); });
+  if(choice!==q.a) btn.classList.add("ar-opt-wrong");
+  const r=m(CASES[ci].c); r.attempted++;
+  if(choice===q.a){ r.correct++; addXP(8,"Case study"); }
+  save();
+  const ex=$("cexp-"+ci+"-"+qi); if(ex) ex.style.display="block";
+}
+/* ============================================================
+   🧪 PRACTICALS KIT — Class 10 Science
+   ============================================================ */
+const PRACTICALS=[
+/* ---------------- PHYSICS ---------------- */
+{cat:"physics",cid:"light-reflection-refraction",t:"Focal length of a concave mirror",
+ aim:"Find the focal length of a concave mirror by obtaining the image of a distant object.",
+ theory:"Rays of light from a far-off object are nearly parallel. A concave mirror converges them at its principal focus. The distance from the pole to the focus is the focal length f, and R = 2f.",
+ mat:"Concave mirror, mirror stand, screen, metre scale, a distant bright object (tree/building).",
+ steps:["Fix the concave mirror on its stand facing a distant object.","Place the screen behind/in front appropriately and move it until a sharp, inverted image forms.","Measure the distance between the mirror and the screen with the scale.","Repeat 2–3 times and take the average."],
+ obs:"A sharp, real, inverted and highly diminished image forms on the screen. Mean distance ≈ focal length.",
+ concl:"The focal length of the given concave mirror ≈ measured pole-to-screen distance; radius R = 2f.",
+ viva:[{q:"What type of image is formed of a distant object?",a:"Real, inverted and highly diminished, formed at the focus."},{q:"Why must the object be distant?",a:"So the incident rays are effectively parallel and converge exactly at the principal focus."},{q:"How is R related to f?",a:"R = 2f."}]},
+{cat:"physics",cid:"light-reflection-refraction",t:"Focal length of a convex lens",
+ aim:"Find the focal length of a convex lens by obtaining the image of a distant object.",
+ theory:"A convex lens converges parallel rays at its principal focus on the other side; the focus-to-lens distance is f.",
+ mat:"Convex lens with holder, screen, scale, distant object.",
+ steps:["Hold the lens facing a distant bright object.","Place a white screen behind the lens and move it until a sharp inverted image is seen.","Measure lens-to-screen distance; repeat and average."],
+ obs:"A sharp, inverted, diminished real image forms at the focus of the lens.",
+ concl:"Focal length ≈ lens-to-screen distance for a sharp distant image.",
+ viva:[{q:"Which lens converges light?",a:"Convex (converging) lens."},{q:"What is the power if f = 25 cm?",a:"P = 1/0.25 = +4 D."},{q:"Is the image real or virtual?",a:"Real — it can be taken on a screen."}]},
+{cat:"physics",cid:"light-reflection-refraction",t:"Refraction through a glass slab",
+ aim:"Trace the path of a ray through a rectangular glass slab and measure angles of incidence, refraction and emergence.",
+ theory:"On entering glass (denser), the ray bends toward the normal; on exiting to air it bends away by the same amount. The emergent ray is parallel to the incident ray but laterally displaced.",
+ mat:"Glass slab, drawing board, paper, pins, protractor, scale.",
+ steps:["Outline the slab; draw a normal and an incident ray at an angle (say 45°).","Fix two pins on the incident ray; look through the slab and fix two more pins in line with the images.","Remove slab and pins, join points to draw refracted and emergent rays.","Measure ∠i, ∠r and ∠e with the protractor."],
+ obs:"∠e = ∠i, and the emergent ray is parallel to the incident ray with a small lateral shift; ∠r < ∠i.",
+ concl:"Light refracts toward the normal on entering a denser medium; the two refractions cancel in direction (emergent ∥ incident) but leave lateral displacement.",
+ viva:[{q:"Why is the emergent ray parallel to the incident ray?",a:"The two parallel surfaces bend the ray by equal and opposite amounts."},{q:"Which angle is smallest?",a:"Angle of refraction r (glass is denser, ray bends toward normal)."},{q:"Does glass slab split white light?",a:"No — parallel surfaces cause colours to recombine; only a prism disperses."}]},
+{cat:"physics",cid:"electricity",t:"Ohm's law (V–I relationship)",
+ aim:"Study the relationship between voltage across and current through a resistor and find its resistance.",
+ theory:"At constant temperature, V ∝ I (Ohm's law); the slope of the V–I graph gives R.",
+ mat:"Resistor wire, ammeter, voltmeter, rheostat, battery, key, connecting wires.",
+ steps:["Connect ammeter in series and voltmeter in parallel across the resistor.","Vary current with the rheostat; note pairs of V and I.","Plot V against I and calculate the slope."],
+ obs:"V–I graph is a straight line through the origin; V/I is constant.",
+ concl:"V = IR holds; R = slope of the V–I graph.",
+ viva:[{q:"Why is the ammeter connected in series?",a:"Current to be measured must pass through it; ammeter has very low resistance."},{q:"Why is the voltmeter in parallel?",a:"It measures potential difference between two points and has very high resistance."},{q:"What does a straight V–I line mean?",a:"Constant resistance — an ohmic conductor."}]},
+{cat:"physics",cid:"electricity",t:"Equivalent resistance — series combination",
+ aim:"Verify that two resistors in series give Rₛ = R₁ + R₂.",
+ theory:"The same current flows through resistors end-to-end; voltages add, so Rₛ = R₁ + R₂.",
+ mat:"Two resistors, ammeter, voltmeter, battery, key, wires.",
+ steps:["Connect R₁ and R₂ end-to-end in a series circuit.","Measure current I and total voltage V.","Compute Rₛ = V/I and compare with R₁ + R₂ (measured separately)."],
+ obs:"Measured equivalent resistance equals R₁ + R₂ within experimental error.",
+ concl:"Series equivalent resistance Rₛ = R₁ + R₂.",
+ viva:[{q:"What stays the same in a series circuit?",a:"Current through every resistor."},{q:"What happens if one series bulb fuses?",a:"The circuit breaks and all bulbs go off."},{q:"Does series give more or less resistance?",a:"More than either individual resistor."}]},
+{cat:"physics",cid:"electricity",t:"Equivalent resistance — parallel combination",
+ aim:"Verify 1/Rₚ = 1/R₁ + 1/R₂ for two resistors in parallel.",
+ theory:"Voltage is identical across parallel branches; currents add, giving 1/Rₚ = 1/R₁ + 1/R₂.",
+ mat:"Two resistors, ammeter, voltmeter, battery, key, wires.",
+ steps:["Connect R₁ and R₂ side-by-side across the same two points.","Measure total current at fixed voltage.","Compute Rₚ = V/I and compare with the formula."],
+ obs:"Rₚ is smaller than the smallest individual resistor and matches the parallel formula.",
+ concl:"Parallel equivalent Rₚ = R₁R₂/(R₁+R₂).",
+ viva:[{q:"What stays the same in parallel?",a:"Voltage across each resistor."},{q:"Why are household fans/bulbs wired in parallel?",a:"Each gets full mains voltage and runs independently."},{q:"What happens to total resistance as branches are added?",a:"It decreases."}]},
+
+/* ---------------- CHEMISTRY ---------------- */
+{cat:"chemistry",cid:"acids-bases-salts",t:"pH of samples with universal indicator",
+ aim:"Determine the pH of given solutions and classify them acidic, basic or neutral.",
+ theory:"pH = −log[H⁺], ranging 0–14. Universal indicator shows a different colour at different pH, matched against a standard chart.",
+ mat:"Test solutions (dil. HCl, NaOH, NaCl, lemon juice, water, baking soda), test tubes, universal indicator solution/paper, chart.",
+ steps:["Take each sample in a clean test tube.","Add a few drops of universal indicator (or dip the paper).","Match the colour to the chart and record pH.","Arrange samples from most acidic to most basic."],
+ obs:"HCl/lemon show red-orange (pH < 7); common salt & water green (pH 7); NaOH/baking soda blue-violet (pH > 7).",
+ concl:"pH < 7 acidic, = 7 neutral, > 7 basic; lower pH means stronger acid.",
+ viva:[{q:"Which has higher pH — lemon juice or soap solution?",a:"Soap solution (basic, pH > 7)."},{q:"pH of a neutral liquid?",a:"7."},{q:"What happens to pH when acid is diluted?",a:"It rises toward 7."}]},
+{cat:"chemistry",cid:"chemical-reactions",t:"Types of chemical reactions",
+ aim:"Perform and identify (a) displacement — iron nail in CuSO₄, and (b) double displacement — Na₂SO₄ with BaCl₂.",
+ theory:"A more reactive metal displaces a less reactive one; two ionic salts exchanging ions give a precipitate (double displacement).",
+ mat:"CuSO₄ solution, Na₂SO₄ solution, BaCl₂ solution, iron nails (cleaned with sandpaper), test tubes, stand.",
+ steps:["Dip two iron nails in blue CuSO₄ solution; leave for 15–20 minutes.","Note the colour change and deposit on the nails.","Mix Na₂SO₄ and BaCl₂ solutions in another test tube and observe."],
+ obs:"Blue solution turns pale green and the nail gets a reddish-brown copper coating (Fe + CuSO₄ → FeSO₄ + Cu). A white precipitate of BaSO₄ forms in the second tube.",
+ concl:"First is a displacement reaction; second is a double displacement (precipitation) reaction.",
+ viva:[{q:"Why is the nail rubbed with sandpaper?",a:"To remove oxide/grease so metal contacts the solution."},{q:"What is the white precipitate?",a:"Barium sulphate, BaSO₄ — insoluble in water."},{q:"Why does blue turn green?",a:"Green FeSO₄ forms as copper is displaced."}]},
+{cat:"chemistry",cid:"acids-bases-salts",t:"Properties of acids and bases",
+ aim:"Study reactions of HCl and NaOH with (a) zinc metal, (b) sodium carbonate, and perform neutralisation.",
+ theory:"Acids and bases both release H₂ with active metals; acids release CO₂ from carbonates; acid + base → salt + water.",
+ mat:"Dilute HCl, NaOH solution, zinc granules, Na₂CO₃, lime water, phenolphthalein, delivery tube, test tubes.",
+ steps:["Add Zn to dil. HCl; test the gas with a burning splinter (pop sound → H₂).","Add HCl to Na₂CO₃; pass the gas through lime water (turns milky → CO₂).","Add phenolphthalein to NaOH (pink), then add HCl dropwise until colourless — neutralisation."],
+ obs:"Hydrogen burns with a pop; CO₂ turns lime water milky; the pink alkaline solution turns colourless at neutralisation.",
+ concl:"Acids react with metals (H₂) and carbonates (CO₂); bases neutralise acids; both Zn and NaOH also give H₂ (Zn is amphoteric).",
+ viva:[{q:"Which gas gives the 'pop' test?",a:"Hydrogen."},{q:"Why does lime water turn milky?",a:"CO₂ forms insoluble white CaCO₃."},{q:"Colour of phenolphthalein in NaOH?",a:"Pink; it goes colourless once neutralised by acid."}]},
+
+/* ---------------- BIOLOGY ---------------- */
+{cat:"biology",cid:"life-processes",t:"Stomata in a temporary leaf peel mount",
+ aim:"Prepare a temporary mount of leaf epidermis and observe stomata.",
+ theory:"Stomata are pores flanked by two bean-shaped guard cells that regulate gas exchange and transpiration; they open in light.",
+ mat:"Fresh leaf (e.g. Tradescantia/lily), slide, coverslip, needle/forceps, safranin, glycerine, microscope.",
+ steps:["Fold and tear a leaf obliquely to peel a thin lower epidermis.","Stain with safranin briefly, mount in glycerine on a slide.","Observe under low then high power of the microscope."],
+ obs:"Tiny pores surrounded by two kidney-shaped guard cells are visible among epidermal cells.",
+ concl:"Stomatal apparatus = pore + two guard cells; guard cells (with chloroplasts) control opening.",
+ viva:[{q:"What enters through stomata?",a:"CO₂ for photosynthesis (and O₂/water vapour exchange)."},{q:"Which cells around the pore have chloroplasts?",a:"The two guard cells."},{q:"When do stomata usually open?",a:"In daylight, for gas exchange."}]},
+{cat:"biology",cid:"reproduction",t:"Binary fission (Amoeba) & budding (Yeast)",
+ aim:"Observe permanent slides/chart of binary fission in Amoeba and budding in yeast.",
+ theory:"Binary fission: a parent cell divides into two equal daughter individuals. Budding: a small outgrowth (bud) develops on the parent and may detach or form a chain.",
+ mat:"Permanent slides (Amoeba fission, yeast budding), microscope; or yeast suspension prepared in sugar solution (compound microscope after mounting).",
+ steps:["Focus the Amoeba slide; note nucleus division and the constriction.","Focus yeast (or a prepared mount) and look for buds, some with chains of daughter cells."],
+ obs:"Amoeba shows nuclear division (karyokinesis) followed by cytoplasmic splitting. Yeast shows one or more tiny buds on parent cells.",
+ concl:"Both are asexual reproduction: binary fission gives equal daughters; budding gives unequal outgrowths.",
+ viva:[{q:"Which division produces two equal daughters?",a:"Binary fission."},{q:"Is budding sexual or asexual?",a:"Asexual — one parent, no gametes."},{q:"Name another organism showing budding.",a:"Hydra."}]},
+{cat:"biology",cid:"life-processes",t:"CO₂ released during respiration",
+ aim:"Show that germinating seeds release carbon dioxide during respiration.",
+ theory:"Aerobic respiration consumes O₂ and releases CO₂; KOH absorbs CO₂, creating a partial vacuum that pulls water up the delivery tube.",
+ mat:"Conical flask, germinating gram seeds, small test tube of KOH solution, delivery tube through the cork, beaker of coloured water.",
+ steps:["Place germinating seeds in the flask with the hanging KOH tube.","Fit a cork with a delivery tube dipping in coloured water; seal airtight.","Leave for 1–2 hours and observe the water column."],
+ obs:"Water rises in the delivery tube. (A control with boiled/dead seeds shows no rise.)",
+ concl:"Rising water shows gas (CO₂) was absorbed by KOH — germinating seeds respire releasing CO₂.",
+ viva:[{q:"Why KOH?",a:"It absorbs CO₂ released by the seeds, lowering pressure inside."},{q:"Why germinating seeds?",a:"They respire vigorously, releasing measurable CO₂."},{q:"Why boiled seeds in the control?",a:"They are dead and do not respire — confirms living seeds cause the effect."}]},
+{cat:"biology",cid:"life-processes",t:"Light is necessary for photosynthesis",
+ aim:"Show that sunlight is necessary for starch formation (photosynthesis).",
+ theory:"Starch (tested blue-black with iodine) forms only in illuminated leaf parts; covered parts cannot photosynthesise and remain starch-free.",
+ mat:"Potted plant (destarched 24–48 h in dark), black paper/strip & clips, water bath, alcohol, iodine solution, forceps.",
+ steps:["Cover part of a leaf with black paper on both sides; place plant in sunlight for some hours.","Pluck the leaf, boil it, decolourise in hot alcohol, and add iodine solution."],
+ obs:"The exposed part turns blue-black (starch present); the covered part stays brown/pale (no starch).",
+ concl:"Light is necessary for photosynthesis; only illuminated parts made starch.",
+ viva:[{q:"Why destarch the plant first?",a:"So pre-existing starch doesn't confuse the result."},{q:"Why boil the leaf in alcohol?",a:"To remove chlorophyll so the iodine colour is visible."},{q:"What does blue-black indicate?",a:"Starch, showing photosynthesis occurred."}]},
+{cat:"biology",cid:"heredity",t:"Homologous & analogous organs (charts/models)",
+ aim:"Study homologous and analogous organs from models/charts and understand how each indicates evolution.",
+ examples:{homo:"Forelimbs of human, bird, bat, frog and whale — same basic bone plan, different functions.",ana:"Wings of a bird/insect (or bat/bird) — same function (flying), totally different structure and origin."},
+ theory:"Homologous organs share an origin/structural plan (common ancestry) but differ in function; analogous organs look similar only because they perform the same function (convergent evolution).",
+ mat:"Charts/models of forelimbs (frog, lizard, bird, bat, human, whale) and wings (bird, insect).",
+ steps:["Examine the bone pattern of the forelimbs and compare them.","Compare bird wings with insect wings structurally.","Classify each set as homologous or analogous with reasoning."],
+ obs:"Forelimbs show the same humerus–radius/ulna–digits plan (homology); insect wing is an extension of exoskeleton with no bones (analogy).",
+ concl:"Homology indicates common ancestry; analogy indicates independent evolution for similar needs.",
+ viva:[{q:"Are bird and bat wings homologous or analogous as wings?",a:"Analogous as flying organs (different structure); the forelimb bones are homologous."},{q:"What does homology prove?",a:"Common evolutionary ancestry."},{q:"Give a plant analogy example.",a:"Tendrils of pea and thorns of Bougainvillea are homologous (same origin, different role)."}]}
+];
+
+let pracCat="all";
+function prSetCat(c){ pracCat=c; renderPracticals(); }
+function renderPracticals(){
+  const box=$("practicalBody"); if(!box) return;
+  const cats={physics:"⚙️ Physics",chemistry:"🧪 Chemistry",biology:"🧬 Biology"};
+  const list=PRACTICALS.filter(p=>pracCat==="all"||p.cat===pracCat);
+  box.innerHTML=`<div class="card mb"><div class="small muted" style="line-height:1.7"><b>${list.length} experiments</b> covering the Class 10 practical syllabus — these feed your internal assessment and the viva. For each: aim, quick theory, materials, procedure, expected observation and the viva questions examiners love. ✅</div></div>`+
+  list.map((p,i)=>{
+    const gi=PRACTICALS.indexOf(p);
+    const viva=p.viva?`<div class="sec-label">🗣 Viva questions</div>`+p.viva.map(v=>`<details class="v2d" style="background:transparent;border-color:rgba(255,255,255,.08)"><summary style="padding:10px 12px;font-size:12.5px">${esc(v.q)}</summary><div class="v2body small" style="color:var(--muted);line-height:1.6">✅ ${esc(v.a)}</div></details>`).join(""):"";
+    const examples=p.examples?`<div class="pkv"><span class="pk">Examples</span><span>${esc(p.examples.homo)}<br>${esc(p.examples.ana)}</span></div>`:"";
+    return `<details class="v2d">
+      <summary><span style="width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(34,211,238,.14);flex-shrink:0;font-size:14px">${cats[p.cat].split(" ")[0]}</span>
+        <span style="flex:1">${i+1}. ${esc(p.t)}</span>
+        <button class="btn sm ghost" onclick="event.preventDefault();switchView('learn');openChapter('${p.cid}','science')">Chapter</button>
+      </summary>
+      <div class="v2body">
+        <div class="pkv"><span class="pk">Aim</span><span>${esc(p.aim)}</span></div>
+        <div class="pkv"><span class="pk">Theory</span><span>${esc(p.theory)}</span></div>
+        ${examples}
+        <div class="pkv"><span class="pk">Materials</span><span>${esc(p.mat)}</span></div>
+        <div class="sec-label">📋 Procedure</div>
+        ${p.steps.map((s,k)=>`<div class="pstep"><span class="n">${k+1}</span><span>${esc(s)}</span></div>`).join("")}
+        <div class="pkv" style="border:none"><span class="pk">Observation</span><span>${esc(p.obs)}</span></div>
+        <div class="pkv" style="border:none"><span class="pk">Conclusion</span><span>${esc(p.concl)}</span></div>
+        ${viva}
+      </div>
+    </details>`;
+  }).join("");
+}
+/* ============================================================
+   ⚡ EXAM MODE v2 — subject + length choice, attempt history
+   ============================================================ */
+let examV2={subj:"mixed",n:10};
+const _renderExam=window.renderExam;
+const _submitExam=window.submitExam;
+
+window.renderExam=function(){
+  _renderExam();
+  if(exam.qs && exam.qs.length){
+    const area=$("examArea");
+    area.innerHTML=area.innerHTML.replace("10 questions · attempt all", exam.qs.length+" questions · attempt all");
+  } else {
+    renderExamSetupV2();
+  }
+};
+function examChip(subj,ic,label){
+  return `<div class="chip fb2-chip ${examV2.subj===subj?'active':''}" onclick="examSetOpt('subj','${subj}')">${ic} ${label}</div>`;
+}
+function examSetOpt(k,v){ examV2[k]=v; renderExamSetupV2(); }
+function renderExamSetupV2(){
+  const h=state.examHistory||[];
+  const avg=h.length?Math.round(h.reduce((a,x)=>a+x.score/x.total*100,0)/h.length):null;
+  const best=h.length?Math.max(...h.map(x=>Math.round(x.score/x.total*100))):null;
+  const hist=h.slice(-8).reverse().map(x=>{
+    const p=Math.round(x.score/x.total*100);
+    const subLabel=x.subj==="mixed"?"🧪 Mixed":x.subj==="maths"?"🧮 Maths":"🔬 Science";
+    return `<div class="exam-hist-row"><span>${subLabel}</span>
+      <span class="small muted">${new Date(x.d).toLocaleDateString()}</span>
+      <span style="margin-left:auto;font-weight:800;color:${p>=70?'var(--green)':p>=50?'var(--amber)':'var(--red)'}">${x.score}/${x.total} · ${p}%</span></div>`;
+  }).join("");
+  $("examArea").innerHTML=`
+    <div class="card center" style="padding:38px 28px">
+      <div style="font-size:42px">📝</div>
+      <h2 style="font-size:22px;margin:12px 0 6px">Board-Style Mock Test</h2>
+      <p class="muted small">PYQ-style MCQs from the ${megaBankSize()}+ question bank · 1 minute per question · instant marking with review</p>
+      <div class="subject-tabs" style="justify-content:center;margin-top:18px">
+        ${examChip("mixed","🧪","Mixed")}
+        ${examChip("maths","🧮","Mathematics")}
+        ${examChip("science","🔬","Science")}
+      </div>
+      <div class="subject-tabs" style="justify-content:center">
+        ${[10,20,30].map(n=>`<div class="chip fb2-chip ${examV2.n===n?'active':''}" onclick="examSetOpt('n',${n})">${n} Q · ${n} min</div>`).join("")}
+      </div>
+      <button class="btn primary mt" style="margin-top:14px;font-size:13px;padding:13px 28px" onclick="startExamV2()">Start ${examV2.n}-Q ${examV2.subj==="mixed"?"Mixed":examV2.subj==="maths"?"Maths":"Science"} test ➜</button>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <h3><span class="em">📈</span> Your mock history</h3>
+        ${hist||'<div class="muted small">No attempts yet — your results will build up here.</div>'}
+      </div>
+      <div class="card">
+        <h3><span class="em">🎯</span> Mock stats</h3>
+        <div class="grid g3" style="gap:10px">
+          <div class="center"><div class="big" style="color:var(--cyan)">${h.length}</div><div class="tiny muted">tests taken</div></div>
+          <div class="center"><div class="big" style="color:var(--green)">${avg===null?"—":avg+"%"}</div><div class="tiny muted">average</div></div>
+          <div class="center"><div class="big" style="color:var(--amber)">${best===null?"—":best+"%"}</div><div class="tiny muted">best</div></div>
+        </div>
+        <div class="small muted mt" style="margin-top:14px;line-height:1.7">💡 Board tip: aim for ≥85% consistently before calling a subject 'done'. After each test, tap <b>Revise this chapter</b> on every wrong answer.</div>
+      </div>
+    </div>`;
+}
+function startExamV2(){
+  const subj=examV2.subj, n=examV2.n;
+  let bank=getMegaBank().filter(q=>subj==="mixed"||q.s===subj);
+  bank=bank.slice().sort(()=>Math.random()-.5).slice(0,n);
+  if(bank.length<4){ toast("Not enough questions for that choice"); return; }
+  exam.qs=bank.map(q=>Object.assign({},q));
+  exam.answers=new Array(exam.qs.length).fill(-1);
+  exam.time=exam.qs.length*60;
+  clearInterval(exam.timer);
+  exam.timer=setInterval(function(){
+    exam.time--;
+    const t=document.querySelector("#examArea .timer");
+    if(t){ const mm=Math.floor(exam.time/60), ss=exam.time%60; t.textContent=mm+":"+pad2(ss); }
+    if(exam.time<=0){ clearInterval(exam.timer); window.submitExam(true); }
+  },1000);
+  window.renderExam(); window.scrollTo(0,0);
+}
+function quickExam(subj,n){ examV2={subj:subj||"mixed",n:n||10}; window.switchView("exam"); startExamV2(); }
+window.submitExam=function(auto){
+  let score=0;
+  exam.qs.forEach((q,i)=>{ if(exam.answers[i]===q.a) score++; });
+  const total=exam.qs.length, subj=examV2.subj;
+  _submitExam(auto);
+  state.examHistory.push({d:Date.now(),subj:subj,score:score,total:total});
+  if(state.examHistory.length>30) state.examHistory.shift();
+  save();
+  const p=Math.round(score/total*100);
+  const avg=Math.round(state.examHistory.reduce((a,x)=>a+x.score/x.total*100,0)/state.examHistory.length);
+  $("examArea").insertAdjacentHTML("afterbegin",
+    `<div class="card mb" style="border-left:3px solid ${p>=70?'var(--green)':p>=50?'var(--amber)':'var(--red)'}">
+      <div class="flex spread"><b>📈 Saved to mock history</b><span class="small muted">Rolling average: ${avg}% · ${state.examHistory.length} test(s)</span></div>
+      <div class="mt" style="margin-top:10px"><button class="btn sm" onclick="window.renderExam()">Back to exam setup</button></div>
+    </div>`);
+};
+
+/* ============================================================
+   🚀 FIRST-RUN ONBOARDING
+   ============================================================ */
+let obStep=0;
+function showOnboarding(step){
+  if(typeof step==="number") obStep=step;
+  let wrap=document.getElementById("obWrap");
+  if(!wrap){ wrap=document.createElement("div"); wrap.id="obWrap"; document.body.appendChild(wrap); }
+  let inner="";
+  if(obStep===0){
+    inner=`<div class="ob-card center">
+      <div style="font-size:52px">🎓</div>
+      <h2 style="font-size:24px;margin:12px 0">Welcome to TWS STUDIES</h2>
+      <p class="muted small" style="line-height:1.7;max-width:380px;margin:0 auto 18px">Your complete AI personal teacher for <b>CBSE Class 10 Maths &amp; Science</b> — lessons, 1300+ MCQs, mock tests, practicals, study plans and an AI tutor that works even offline. Let's set you up in 20 seconds.</p>
+      <label class="small muted" style="display:block;text-align:left">What's your name?</label>
+      <input id="obName" class="btn" style="color:var(--text)" value="${esc(state.studentName||"")}" placeholder="Your name">
+      <button class="btn primary" style="width:100%;margin-top:14px;justify-content:center" onclick="obNext()">Continue ➜</button>
+    </div>`;
+  } else if(obStep===1){
+    inner=`<div class="ob-card">
+      <h2 style="font-size:20px;margin-bottom:6px">📅 When do your boards begin?</h2>
+      <p class="muted small">An approximate date is fine — I'll build a countdown plan around it.</p>
+      <input type="date" id="obDate" class="btn" style="color:var(--text);width:100%" value="${state.plan.examDate||defaultExamDate()}">
+      <label class="small muted" style="display:block;margin-top:16px">🎯 Your target score</label>
+      <select id="obTarget" class="btn" style="color:var(--text);width:100%">
+        ${[75,85,90,95].map(t=>`<option value="${t}" ${(state.plan.target||90)===t?"selected":""}>${t}%</option>`).join("")}
+      </select>
+      <button class="btn primary" style="width:100%;margin-top:16px;justify-content:center" onclick="obNext()">Build my plan ➜</button>
+    </div>`;
+  } else {
+    const name=($("obName")&&$("obName").value.trim())||state.studentName||"";
+    const date=($("obDate")&&$("obDate").value)||defaultExamDate();
+    const target=+(($("obTarget")&&$("obTarget").value)||90);
+    inner=`<div class="ob-card center">
+      <div style="font-size:52px">🚀</div>
+      <h2 style="font-size:21px;margin:12px 0">You're all set${name?", "+esc(name):""}!</h2>
+      <p class="muted small" style="line-height:1.7;max-width:380px;margin:0 auto 16px">Your day-by-day plan is ready, prioritising the highest-marks chapters first. Start with today's tasks, keep your streak alive, and the 🤖 AI tutor is one tap away whenever you're stuck.</p>
+      <button class="btn primary" style="width:100%;justify-content:center" onclick="obFinish('${encodeURIComponent(name)}','${date}',${target})">See my plan ➜</button>
+    </div>`;
+  }
+  wrap.innerHTML=inner;
+}
+function obNext(){
+  if(obStep===0) obStep=1; else obStep=2;
+  showOnboarding();
+}
+function obFinish(nameEnc,date,target){
+  const name=decodeURIComponent(nameEnc||"");
+  if(name) state.studentName=name;
+  state.plan.examDate=date; state.plan.target=target;
+  state.onboarded=true;
+  save();
+  const wrap=document.getElementById("obWrap"); if(wrap) wrap.remove();
+  window.renderExam(); augmentHomePlan(); updatePlanBadge();
+  window.switchView("planner");
+  toast("Welcome aboard 🎉");
+}
+
+/* ============================================================
+   🔊 READ-ALOUD for the AI tutor (text-to-speech)
+   ============================================================ */
+(function(){
+  const head=document.querySelector("#view-tutor .chat-head");
+  if(head) head.insertAdjacentHTML("beforeend",'<button class="btn sm ghost" id="ttsBtn" style="margin-left:auto" onclick="speakLastBot()" title="Read last tutor reply aloud">🔊 Listen</button>');
+})();
+function speakLastBot(){
+  if(!"speechSynthesis" in window){ toast("Read-aloud isn't supported on this browser"); return; }
+  const bots=document.querySelectorAll("#chat .msg.bot");
+  if(!bots.length) return;
+  const clone=bots[bots.length-1].cloneNode(true);
+  const lbl=clone.querySelector(".lbl"); if(lbl) lbl.remove();
+  const txt=clone.textContent.trim();
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(txt);
+  u.lang="en-IN"; u.rate=1.02;
+  const v=speechSynthesis.getVoices().find(x=>/en[-_]?IN/i.test(x.lang)) || speechSynthesis.getVoices().find(x=>/^en/i.test(x.lang));
+  if(v) u.voice=v;
+  const btn=$("ttsBtn"); if(btn){ btn.textContent="🔊 Playing…"; u.onend=()=>btn.textContent="🔊 Listen"; }
+  speechSynthesis.speak(u);
+}
+
+/* ============================================================
+   small navigation helpers used by plan tasks
+   ============================================================ */
+function setRepeatedSubj(s){
+  repeatedSubject=s;
+  document.querySelectorAll("#view-repeated .chip").forEach(x=>x.classList.toggle("active", x.dataset.rsubj===s));
+  renderRepeated();
+}
+
+/* ============================================================
+   🔌 WIRE NEW VIEWS INTO NAVIGATION + HOME
+   ============================================================ */
+const _switchView=window.switchView;
+window.switchView=function(name){
+  _switchView(name);
+  try{
+    if(name==="planner") renderPlanner();
+    if(name==="formulas") renderFormulaBook();
+    if(name==="competency"){
+      if(!state.competencySeen){ state.competencySeen=true; save(); const nb=$("navCompBadge"); if(nb) nb.textContent=""; }
+      renderCompetency();
+    }
+    if(name==="practicals") renderPracticals();
+    if(name==="home") augmentHomePlan();
+  }catch(e){ console.error("v2 view error", name, e); }
+};
+/* keep home mini-plan attached on every home re-render (XP events etc.) */
+const _renderHome=window.renderHome;
+window.renderHome=function(){ _renderHome(); try{ augmentHomePlan(); }catch(e){} };
+
+/* chip active states for new views */
+function syncChips(sel, attr, val){
+  document.querySelectorAll(sel+" .chip").forEach(x=>x.classList.toggle("active", x.getAttribute(attr)===val));
+}
+const _fbSet=fbSetSubj;
+window.fbSetSubj=function(s){ fbSubj=s; syncChips("#view-formulas","data-fb",s); renderFormulaBook(); };
+window.compSetTab=function(t){ compTab=t; syncChips("#view-competency","data-cb",t); renderCompetency(); };
+window.prSetCat=function(c){ pracCat=c; syncChips("#view-practicals","data-pb",c); renderPracticals(); };
+
+/* settings: allow re-running onboarding */
+const _openSettings=window.openSettings;
+window.openSettings=function(){
+  _openSettings();
+  const box=$("settingsBox");
+  if(box && !$("setRerunOb")){
+    box.insertAdjacentHTML("beforeend",
+      `<div class="sec-label">🚀 Welcome setup</div>
+       <button class="btn sm" id="setRerunOb" onclick="closeSettings();state.onboarded=false;save();showOnboarding(0)">Re-run welcome setup</button>`);
+  }
+};
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+(function v2boot(){
+  v2Ensure();
+  window.renderExam();          // swap mock-test setup for v2 setup
+  augmentHomePlan();
+  updatePlanBadge();
+  renderFormulaBook();
+  renderCompetency();
+  renderPracticals();
+  if(!state.onboarded) setTimeout(()=>showOnboarding(0), 700);
+})();
 
 </script>
 </body>

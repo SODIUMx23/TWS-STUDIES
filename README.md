@@ -42,3 +42,12 @@ On iPhone/iPad, use **Safari → Share → "Add to Home Screen"** (Apple doesn't
 
 ## Note on data
 Progress is stored in the browser's local storage on that device. Use **Settings → Export/Import** to back up or move between devices.
+
+## 🆕 v2 Flagship Upgrade
+
+- 🧭 **My Study Plan** — set your board exam date & target, get an auto day-by-day plan (high-marks chapters first + 10-day final revision phase) with checkable tasks and optional daily reminders.
+- 📒 **Formula Book** — all chapter formulas, concepts & common mistakes in one handbook, plus 8 exam cheat-sheets (trig table, mensuration, reactivity series, common salts, electrical units, optics sign rules, pH indicators).
+- 🧩 **Competency Corner** — 39 Assertion–Reason questions and 13 case-study passages with 39 board-style MCQs (CBSE's 2025–26 competency pattern).
+- 🧪 **Practicals Kit** — all 14 Class-10 experiments with aim, theory, materials, procedure, observation, conclusion and viva Q&A.
+- ⚡ **Exam Mode v2** — choose Mixed / Maths / Science and 10 / 20 / 30-question timed mocks, with saved attempt history and rolling average.
+- 🚀 First-run onboarding (name, exam date, target score) and 🔊 read-aloud tutor replies.
