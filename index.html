@@ -370,7 +370,12 @@ canvas{max-width:100%}
     <div class="nav-item" data-view="search"><span class="ic">🔎</span><span>Search</span></div>
     <div class="nav-item" data-view="parent"><span class="ic">👨‍👩‍👧</span><span>Parent View</span></div>
     <div class="foot">CBSE · Class 10<br>Maths + Science<br>2025–26 blueprint-based</div>
-    <div class="nav-item" id="settingsBtn" style="cursor:pointer"><span class="ic">⚙️</span><span>Settings</span></div>
+    <div class="nav-item" data-view="papers"><span class="ic">📑</span><span>Sample Papers</span><span class="badge" style="background:#0284c7;color:#fff">2026</span></div>
+    <div class="nav-item" data-view="flashcards"><span class="ic">⚡</span><span>Flashcards</span></div>
+    <div class="nav-item" data-view="bookmarks"><span class="ic">🔖</span><span>Revision Vault</span><span class="badge" id="navBookmarksBadge"></span></div>
+    <div class="nav-item" data-view="focusDesk"><span class="ic">⏱️</span><span>Focus Desk</span></div>
+    <div style="padding: 6px 14px 10px"><button class="theme-toggle-btn" onclick="toggleTheme()" style="width:100%; justify-content:center">☀️ Light Mode</button></div>
+    <div class="nav-item" id="settingsBtn"  style="cursor:pointer"><span class="ic">⚙️</span><span>Settings</span></div>
     <div class="nav-item" id="installBtn" style="cursor:pointer;display:none"><span class="ic">📲</span><span>Install App</span></div>
   </aside>
 
@@ -626,6 +631,26 @@ canvas{max-width:100%}
         <div><h1>👨‍👩‍👧 Parent Dashboard</h1><div class="sub">Progress at a glance</div></div>
       </div>
       <div id="parentBody"></div>
+    </section>
+
+    <!-- SAMPLE PAPERS -->
+    <section class="view" id="view-papers">
+      <div id="papersBody"></div>
+    </section>
+
+    <!-- FLASHCARDS -->
+    <section class="view" id="view-flashcards">
+      <div id="flashcardsBody"></div>
+    </section>
+
+    <!-- REVISION VAULT (BOOKMARKS) -->
+    <section class="view" id="view-bookmarks">
+      <div id="bookmarksBody"></div>
+    </section>
+
+    <!-- FOCUS DESK (POMODORO) -->
+    <section class="view" id="view-focusDesk">
+      <div id="focusDeskBody"></div>
     </section>
   </main>
 </div>
@@ -6378,6 +6403,620 @@ window.openChapter = function(cid, subj){
 
   $("modalBg").classList.add("open");
 };
+
+
+/* ===== FLAGSHIP v3 SUITE INJECTION ===== */
+/* ================= FLAGSHIP v3 SUITE: PAPERS, FLASHCARDS, BOOKMARKS, FOCUS DESK, THEME ================= */
+const SAMPLE_PAPERS = window.SAMPLE_PAPERS = [{"id": "maths-standard-2025", "title": "Mathematics (Standard) — Official Board Model Paper", "subject": "maths", "code": "041", "maxMarks": 80, "time": "3 Hours", "guidelines": ["This question paper contains 38 questions divided into 5 Sections: A, B, C, D, and E.", "Section A comprises 20 Multiple Choice Questions (MCQs) of 1 mark each (Q1–Q20). Q19 and Q20 are Assertion-Reason based.", "Section B comprises 5 Very Short Answer (VSA) type questions of 2 marks each (Q21–Q25).", "Section C comprises 6 Short Answer (SA) type questions of 3 marks each (Q26–Q31).", "Section D comprises 4 Long Answer (LA) type questions of 5 marks each (Q32–Q35).", "Section E comprises 3 Case-Based integrated units of assessment of 4 marks each (Q36–Q38) with sub-parts.", "All questions are compulsory. However, internal choices are provided in 2 questions of Section B, 2 questions of Section C, 2 questions of Section D, and in 2 questions of 2 marks in Section E."], "timeStrategy": [{"phase": "Reading Time", "duration": "15 min", "action": "Scan all 38 questions; select preferred internal choices; identify easy questions."}, {"phase": "Section A (20 MCQs)", "duration": "30 min", "action": "1.5 min per MCQ. Do not spend >3 min on any single 1-mark question."}, {"phase": "Section B (5 VSA × 2M)", "duration": "25 min", "action": "5 min per question. Write given, formula, direct substitution."}, {"phase": "Section C (6 SA × 3M)", "duration": "35 min", "action": "6 min per question. Step-by-step working with diagrams."}, {"phase": "Section D (4 LA × 5M)", "duration": "45 min", "action": "11 min per question. Full proofs (Given, To Prove, Construction, Proof) and complete calculations."}, {"phase": "Section E (3 Cases × 4M)", "duration": "30 min", "action": "10 min per case study. Read scenario carefully before answering sub-questions."}, {"phase": "Final Revision", "duration": "15 min", "action": "Verify question numbers, recheck signs in algebra, ensure proper units (cm², m, km/h) on every final answer."}], "sections": [{"name": "Section A", "desc": "20 Questions · 1 Mark Each · Objective MCQs & Assertion-Reason", "questions": [{"qNum": 1, "marks": "1 Mark", "q": "If two positive integers a and b are written as a = x³y² and b = xy³, where x, y are prime numbers, then HCF(a, b) is:", "options": ["xy", "xy²", "x³y³", "x²y²"], "ans": 1, "explanation": "HCF is the product of the smallest powers of common prime factors: powers of x are 3 and 1 (min = 1); powers of y are 2 and 3 (min = 2). Hence HCF = x¹y² = xy²."}, {"qNum": 2, "marks": "1 Mark", "q": "The quadratic polynomial whose zeroes are −3 and 4 is:", "options": ["x² − x + 12", "x² + x + 12", "x²/2 − x/2 − 6", "2x² + 2x − 24"], "ans": 2, "explanation": "Sum of zeroes S = −3 + 4 = 1; Product P = (−3)(4) = −12. Polynomial is k[x² − x − 12]. For k = 1/2, it becomes x²/2 − x/2 − 6."}, {"qNum": 3, "marks": "1 Mark", "q": "The lines representing the pair of equations 3x + 2ky = 2 and 2x + 5y + 1 = 0 are parallel if k is:", "options": ["−5/4", "2/5", "15/4", "3/2"], "ans": 2, "explanation": "For parallel lines: a₁/a₂ = b₁/b₂ ≠ c₁/c₂ ⇒ 3/2 = 2k/5 ⇒ 4k = 15 ⇒ k = 15/4."}, {"qNum": 4, "marks": "1 Mark", "q": "If the discriminant of the quadratic equation 6x² − bx + 2 = 0 is 1, then the value of b is:", "options": ["±7", "±6", "±5", "±4"], "ans": 0, "explanation": "D = b² − 4ac = (−b)² − 4(6)(2) = b² − 48. Given D = 1 ⇒ b² − 48 = 1 ⇒ b² = 49 ⇒ b = ±7."}, {"qNum": 5, "marks": "1 Mark", "q": "The distance of the point P(−6, 8) from the origin is:", "options": ["8", "2√7", "10", "6"], "ans": 2, "explanation": "Distance from origin = √[x² + y²] = √[(−6)² + 8²] = √[36 + 64] = √100 = 10 units."}]}, {"name": "Section B", "desc": "5 Questions · 2 Marks Each · Very Short Answer", "questions": [{"qNum": 21, "marks": "2 Marks", "q": "Prove that √5 is an irrational number.", "stepMarking": [{"step": "Assumption: Let √5 = a/b where a, b are coprime integers (b ≠ 0)", "marks": "½ Mark"}, {"step": "Square both sides: 5b² = a² ⇒ 5 divides a² ⇒ 5 divides a ⇒ a = 5c", "marks": "½ Mark"}, {"step": "Substitute: 5b² = 25c² ⇒ b² = 5c² ⇒ 5 divides b² ⇒ 5 divides b", "marks": "½ Mark"}, {"step": "Contradiction statement: a and b have common factor 5, contradicting coprime assumption. Hence √5 is irrational", "marks": "½ Mark"}], "solution": "Assume to the contrary that √5 is rational. Then √5 = a/b where a, b are coprime integers and b ≠ 0.\nSquaring both sides: 5 = a² / b² ⇒ a² = 5b².\nSince 5 divides a², by prime divisibility theorem, 5 divides a. So let a = 5c for some integer c.\nSubstituting: (5c)² = 5b² ⇒ 25c² = 5b² ⇒ b² = 5c².\nThis means 5 divides b², so 5 divides b.\nTherefore, both a and b have at least 5 as a common factor.\nThis contradicts the fact that a and b are coprime.\nThis contradiction arises because of our incorrect assumption that √5 is rational.\nHence, √5 is an irrational number. [Proved]"}, {"qNum": 22, "marks": "2 Marks", "q": "In △ABC, D and E are points on the sides AB and AC respectively such that DE ∥ BC. If AD = x, DB = x − 2, AE = x + 2, and EC = x − 1, find the value of x.", "stepMarking": [{"step": "State Basic Proportionality Theorem: AD / DB = AE / EC", "marks": "½ Mark"}, {"step": "Substitute: x / (x − 2) = (x + 2) / (x − 1)", "marks": "½ Mark"}, {"step": "Cross-multiply: x(x − 1) = (x − 2)(x + 2) ⇒ x² − x = x² − 4", "marks": "½ Mark"}, {"step": "Solve: −x = −4 ⇒ x = 4 cm", "marks": "½ Mark"}], "solution": "In △ABC, DE ∥ BC.\nBy Basic Proportionality Theorem (Thales Theorem):\n  AD / DB = AE / EC\n  x / (x − 2) = (x + 2) / (x − 1)\n  x(x − 1) = (x − 2)(x + 2)\n  x² − x = x² − 4\n  Subtracting x² from both sides:\n  −x = −4\n  x = 4.\nHence, the value of x is 4 cm."}]}, {"name": "Section C", "desc": "6 Questions · 3 Marks Each · Short Answer", "questions": [{"qNum": 26, "marks": "3 Marks", "q": "Find the zeroes of the quadratic polynomial 6x² − 3 − 7x and verify the relationship between the zeroes and the coefficients.", "stepMarking": [{"step": "Rearrange in standard form 6x² − 7x − 3 = 0 and factorise into (2x − 3)(3x + 1) = 0", "marks": "1 Mark"}, {"step": "Find zeroes: α = 3/2 and β = −1/3", "marks": "½ Mark"}, {"step": "Verify sum: α + β = 3/2 + (−1/3) = 7/6 = −(−7)/6 = −b/a", "marks": "¾ Mark"}, {"step": "Verify product: αβ = (3/2)(−1/3) = −3/6 = −1/2 = c/a", "marks": "¾ Mark"}], "solution": "Standard form: p(x) = 6x² − 7x − 3.\nSplitting the middle term (product = 6 × (−3) = −18, sum = −7; factors −9 and +2):\n  p(x) = 6x² − 9x + 2x − 3 = 3x(2x − 3) + 1(2x − 3) = (2x − 3)(3x + 1).\nFor zeroes, p(x) = 0 ⇒ 2x − 3 = 0 or 3x + 1 = 0 ⇒ x = 3/2 or x = −1/3.\nZeroes are α = 3/2, β = −1/3.\n\nHere a = 6, b = −7, c = −3.\nVerification:\n1. Sum of zeroes: α + β = 3/2 − 1/3 = (9 − 2)/6 = 7/6 = −(−7)/6 = −b/a. [Verified]\n2. Product of zeroes: αβ = (3/2) × (−1/3) = −3/6 = c/a. [Verified]"}]}, {"name": "Section D", "desc": "4 Questions · 5 Marks Each · Long Answer", "questions": [{"qNum": 32, "marks": "5 Marks", "q": "State and prove Basic Proportionality Theorem (Thales Theorem). Using this theorem, prove that a line drawn through the mid-point of one side of a triangle parallel to another side bisects the third side.", "stepMarking": [{"step": "Statement, Given, To Prove, Construction for BPT", "marks": "1½ Marks"}, {"step": "Proof of BPT using ratio of areas of triangles", "marks": "2 Marks"}, {"step": "Application: In △ABC, D is midpoint of AB (AD = DB ⇒ AD/DB = 1). Since DE ∥ BC, AE/EC = AD/DB = 1 ⇒ AE = EC, hence E bisects AC", "marks": "1½ Marks"}], "solution": "Part 1: Basic Proportionality Theorem (Thales' Theorem):\nStatement: If a line is drawn parallel to one side of a triangle intersecting the other two sides in distinct points, the other two sides are divided in the same ratio.\nGiven: In △ABC, line DE ∥ BC intersecting AB at D and AC at E.\nTo Prove: AD / DB = AE / EC.\nConstruction: Join BE and CD. Draw DM ⊥ AC and EN ⊥ AB.\nProof:\n  ar(△ADE) = ½ × AD × EN\n  ar(△BDE) = ½ × DB × EN\n  ar(△ADE) / ar(△BDE) = AD / DB   ...(1)\n\n  ar(△ADE) = ½ × AE × DM\n  ar(△CDE) = ½ × EC × DM\n  ar(△ADE) / ar(△CDE) = AE / EC   ...(2)\n\n  Since △BDE and △CDE are on the same base DE and between same parallels DE ∥ BC:\n  ar(△BDE) = ar(△CDE)   ...(3)\n  From (1), (2), and (3): AD / DB = AE / EC. [Proved]\n\nPart 2: Application:\nGiven D is the midpoint of AB ⇒ AD = DB ⇒ AD / DB = 1.\nSince DE ∥ BC, by BPT:\n  AE / EC = AD / DB = 1\n  AE = EC.\nHence, E is the midpoint of AC (the line bisects the third side). [Hence Proved]"}]}, {"name": "Section E", "desc": "3 Case Studies · 4 Marks Each · Competency Based", "questions": [{"qNum": 36, "marks": "4 Marks", "passage": "A drone is deployed to survey an archaeological monument. The monument consists of a cylindrical base surmounted by a hemispherical dome. The total height of the monument is 30 m and the diameter of the base is 28 m. The drone is stationed at a point 14 m away from the base at ground level.", "subQuestions": [{"q": "(i) Find the radius of the hemispherical dome and height of the cylindrical portion. [1 Mark]", "a": "Radius r = 28/2 = 14 m. Height of hemispherical dome = radius = 14 m. Height of cylinder h = Total height − radius = 30 − 14 = 16 m."}, {"q": "(ii) Calculate the internal curved surface area of the cylindrical base. [1 Mark]", "a": "CSA of cylinder = 2πrh = 2 × (22/7) × 14 × 16 = 2 × 22 × 2 × 16 = 1408 m²."}, {"q": "(iii) Find the total internal volume of the monument. [2 Marks]", "a": "Total volume = Volume of cylinder + Volume of hemisphere = πr²h + ⅔πr³ = πr²(h + ⅔r) = (22/7) × 14² × [16 + ⅔(14)] = (22/7) × 196 × [16 + 28/3] = 22 × 28 × (76/3) = 616 × 76 / 3 = 46816 / 3 ≈ 15,605.33 m³."}]}]}]}, {"id": "science-board-2025", "title": "Science — Official Board Model Paper", "subject": "science", "code": "086", "maxMarks": 80, "time": "3 Hours", "guidelines": ["This question paper consists of 39 questions in 5 Sections.", "Section A consists of 20 objective type questions carrying 1 mark each (Q1–Q20). Q17–Q20 are Assertion-Reasoning.", "Section B consists of 6 Very Short questions carrying 2 marks each (Q21–Q26).", "Section C consists of 7 Short Answer type questions carrying 3 marks each (Q27–Q33).", "Section D consists of 3 Long Answer type questions carrying 5 marks each (Q34–Q36).", "Section E consists of 3 source-based/case-based assessment units of 4 marks each (Q37–Q39).", "All questions are compulsory with internal choice provided in some questions."], "timeStrategy": [{"phase": "Reading Time", "duration": "15 min", "action": "Read Section E passages; identify key choices in Section D."}, {"phase": "Section A (20 MCQs)", "duration": "25 min", "action": "Carefully read Assertion-Reason rules (A, B, C, D codes)."}, {"phase": "Section B (6 VSA × 2M)", "duration": "25 min", "action": "Exact technical definitions, balanced chemical reactions."}, {"phase": "Section C (7 SA × 3M)", "duration": "40 min", "action": "Point-wise structured answers with neat diagrams."}, {"phase": "Section D (3 LA × 5M)", "duration": "40 min", "action": "Derivations (parallel resistors, lens formula), biological flowcharts."}, {"phase": "Section E (3 Cases × 4M)", "duration": "30 min", "action": "Competency data interpretation and analytical reasoning."}, {"phase": "Final Revision", "duration": "20 min", "action": "Check balancing of every equation, ray arrows on diagrams, and SI units."}], "sections": [{"name": "Section A", "desc": "20 Questions · 1 Mark Each · Objective MCQs & Assertion-Reason", "questions": [{"qNum": 1, "marks": "1 Mark", "q": "When dilute hydrochloric acid is added to iron filings, what happens?", "options": ["Hydrogen gas and iron(II) chloride are produced.", "Chlorine gas and iron hydroxide are produced.", "No reaction takes place.", "Iron salt and water are produced."], "ans": 0, "explanation": "Fe(s) + 2HCl(aq) → FeCl₂(aq) + H₂(g)↑. Iron is more reactive than hydrogen and displaces it with brisk effervescence."}, {"qNum": 2, "marks": "1 Mark", "q": "Which of the following oxide(s) of iron would be obtained on prolonged reaction of iron with steam?", "options": ["FeO", "Fe₂O₃", "Fe₃O₄", "Fe₂O₃ and Fe₃O₄"], "ans": 2, "explanation": "3Fe(s) + 4H₂O(g) → Fe₃O₄(s) (Ferrosoferric oxide / magnetic iron oxide) + 4H₂(g)."}, {"qNum": 3, "marks": "1 Mark", "q": "The site of fertilisation in human female reproductive system is:", "options": ["Ovary", "Uterus", "Fallopian tube (Oviduct)", "Cervix"], "ans": 2, "explanation": "Fertilisation of the ovum by a sperm occurs in the ampullary-isthmic junction of the Fallopian tube (Oviduct)."}, {"qNum": 4, "marks": "1 Mark", "q": "A cylindrical conductor of length l and uniform area of cross-section A has resistance R. Another conductor of length 2l and resistance R of the same material has area of cross-section:", "options": ["A/2", "3A/2", "2A", "3A"], "ans": 2, "explanation": "R = ρ(l/A). For second wire: R = ρ(2l / A') ⇒ ρ(l/A) = ρ(2l / A') ⇒ A' = 2A."}]}, {"name": "Section B", "desc": "6 Questions · 2 Marks Each · Very Short Answer", "questions": [{"qNum": 21, "marks": "2 Marks", "q": "Why do copper vessels turn green when exposed to moist air? Write the chemical formula of the green coating and how it can be cleaned.", "stepMarking": [{"step": "Reason: Basic copper carbonate coating formed by reaction with moist CO₂ and O₂: 2Cu + H₂O + CO₂ + O₂ → CuCO₃·Cu(OH)₂", "marks": "1 Mark"}, {"step": "Cleaning: Cleaned using lemon juice or tamarind (citric/tartaric acid) because the acid dissolves basic copper carbonate into soluble salt", "marks": "1 Mark"}], "solution": "When copper is exposed to moist air for a long time, it undergoes corrosion and reacts with moisture, atmospheric carbon dioxide, and oxygen to form a basic green coating of basic copper carbonate [CuCO₃·Cu(OH)₂].\nReaction: 2Cu(s) + H₂O(l) + CO₂(g) + O₂(g) ───> CuCO₃·Cu(OH)₂(s) [Green]\nCleaning: Since the green layer is basic in nature, it is cleaned with lemon juice or tamarind paste (containing weak organic acids like citric acid / tartaric acid). The acid reacts with basic copper carbonate to form a soluble salt and water, leaving the shining brown copper surface clean."}]}, {"name": "Section C", "desc": "7 Questions · 3 Marks Each · Short Answer", "questions": [{"qNum": 27, "marks": "3 Marks", "q": "Describe the double circulation in human heart with a labelled schematic flow diagram. Why is it advantageous?", "stepMarking": [{"step": "Schematic pathway showing Pulmonary circuit and Systemic circuit", "marks": "1½ Marks"}, {"step": "Advantage: Complete separation of oxygenated and deoxygenated blood maintains high metabolic rate and constant body temperature (warm-blooded)", "marks": "1½ Marks"}], "solution": "In the human heart, blood passes through the heart twice during each complete cardiac cycle. This is called Double Circulation, consisting of:\n1. Pulmonary Circulation: Deoxygenated blood from the body enters Right Atrium → Right Ventricle → Pulmonary Artery → Lungs (oxygenated) → Pulmonary Veins → Left Atrium.\n2. Systemic Circulation: Oxygenated blood from Left Atrium → Left Ventricle → Aorta → Body organs and tissues (oxygen utilised) → Vena Cava → Right Atrium.\n\nAdvantage:\nIt ensures complete physical separation of oxygenated and deoxygenated blood, providing maximal concentration gradient of oxygen to body cells. This supports the high metabolic rate required by warm-blooded mammals to maintain a constant internal body temperature."}]}, {"name": "Section D", "desc": "3 Questions · 5 Marks Each · Long Answer", "questions": [{"qNum": 34, "marks": "5 Marks", "q": "(a) Derive the relation between focal length f and radius of curvature R for a spherical mirror.\n(b) An object is placed at a distance of 12 cm in front of a concave mirror. It forms a real image 4 times larger than the object. Calculate the distance of the image from the mirror and the focal length of the mirror.", "stepMarking": [{"step": "(a) Derivation showing R = 2f (or f = R/2) with ray diagram", "marks": "2 Marks"}, {"step": "(b) Given: u = −12 cm. For real inverted image, magnification m = −4", "marks": "1 Mark"}, {"step": "m = −v/u ⇒ −4 = −v / (−12) ⇒ v = −48 cm", "marks": "1 Mark"}, {"step": "Mirror formula: 1/f = 1/v + 1/u = 1/(−48) + 1/(−12) = (−1 − 4)/48 = −5/48 ⇒ f = −48/5 = −9.6 cm", "marks": "1 Mark"}], "solution": "(a) For spherical mirrors with small apertures, the principal focus F lies midway between the pole P and the centre of curvature C. Therefore, R = 2f (or f = R/2).\n\n(b) Given for concave mirror:\nObject distance u = −12 cm\nSince the image is real, it is inverted, so magnification m = −4.\n\nUsing magnification formula for mirrors:\n  m = −v / u\n  −4 = −v / (−12)\n  −4 = v / 12\n  v = −48 cm.\nTherefore, the image is formed 48 cm in front of the mirror (on the same side as the object).\n\nUsing mirror formula:\n  1 / f = 1 / v + 1 / u\n  1 / f = 1 / (−48) + 1 / (−12)\n  1 / f = −1 / 48 − 4 / 48\n  1 / f = −5 / 48\n  f = −48 / 5 = −9.6 cm.\n\nHence, the focal length of the concave mirror is −9.6 cm (or magnitude 9.6 cm)."}]}, {"name": "Section E", "desc": "3 Case Studies · 4 Marks Each · Competency Based", "questions": [{"qNum": 37, "marks": "4 Marks", "passage": "A student connected three identical resistors of resistance 6 Ω each in different combinations to a 12 V battery to study the equivalent resistance and current in different electrical circuits.", "subQuestions": [{"q": "(i) What is the maximum equivalent resistance possible with these three resistors? [1 Mark]", "a": "Maximum resistance is obtained when connected in SERIES: Rs = R₁ + R₂ + R₃ = 6 + 6 + 6 = 18 Ω."}, {"q": "(ii) What is the minimum equivalent resistance possible? [1 Mark]", "a": "Minimum resistance is obtained when connected in PARALLEL: 1/Rp = 1/6 + 1/6 + 1/6 = 3/6 = 1/2 ⇒ Rp = 2 Ω."}, {"q": "(iii) How should the three resistors be connected to obtain an equivalent resistance of 9 Ω? Calculate the current drawn from the 12 V battery in this arrangement. [2 Marks]", "a": "Connect two resistors in parallel, and the third in series with that combination: R_parallel = (6 × 6)/(6 + 6) = 3 Ω. Total R = 3 + 6 = 9 Ω. Current drawn I = V / R = 12 V / 9 Ω = 1.33 Amperes."}]}]}]}];
+const FLASHCARDS = window.FLASHCARDS = [{"id": "fc-1", "cat": "Chemistry", "front": "What are the colours of FeSO₄ crystals before and after heating?", "back": "Before heating: Pale green (FeSO₄·7H₂O).\nAfter heating: White (anhydrous FeSO₄) → Reddish-brown (Fe₂O₃ solid) with choking odour of burning sulphur (SO₂ + SO₃).", "hint": "Thermal decomposition"}, {"id": "fc-2", "cat": "Chemistry", "front": "What is the colour of Lead Nitrate crystals and what is observed on heating?", "back": "Pb(NO₃)₂ is a white crystalline solid.\nOn heating: Produces yellow solid residue of Lead(II) oxide (PbO) and dense brown fumes of Nitrogen Dioxide (NO₂) + colourless O₂ gas.", "hint": "Brown fumes"}, {"id": "fc-3", "cat": "Chemistry", "front": "What is the chemical formula of Plaster of Paris vs Gypsum?", "back": "Plaster of Paris: CaSO₄·½H₂O (Calcium sulphate hemihydrate).\nGypsum: CaSO₄·2H₂O (Calcium sulphate dihydrate).\nFormed by heating gypsum at 373 K (100°C).", "hint": "Water of crystallisation"}, {"id": "fc-4", "cat": "Chemistry", "front": "What is the chemical formula and common name of Bleaching Powder?", "back": "Formula: CaOCl₂ (Calcium oxychloride).\nPrepared by passing chlorine gas over dry slaked lime: Ca(OH)₂ + Cl₂ → CaOCl₂ + H₂O.", "hint": "Disinfectant"}, {"id": "fc-5", "cat": "Chemistry", "front": "What are amphoteric oxides? Name two examples.", "back": "Metal oxides that react with BOTH acids and bases to produce salt and water.\nExamples: Aluminium oxide (Al₂O₃) and Zinc oxide (ZnO).", "hint": "Acid + Base reactive"}, {"id": "fc-6", "cat": "Chemistry", "front": "Which two metals liberate H₂ gas with very dilute (1%) Nitric Acid (HNO₃)?", "back": "Magnesium (Mg) and Manganese (Mn).\nAll other metals fail to liberate H₂ because concentrated HNO₃ is a strong oxidising agent that oxidises H₂ into H₂O.", "hint": "Reactivity exception"}, {"id": "fc-7", "cat": "Chemistry", "front": "What is the difference between Roasting and Calcination?", "back": "Roasting: Heating Sulphide ores in EXCESS air (2ZnS + 3O₂ → 2ZnO + 2SO₂).\nCalcination: Heating Carbonate ores in LIMITED or absence of air (ZnCO₃ → ZnO + CO₂).", "hint": "C for Carbonate = C for Calcination"}, {"id": "fc-8", "cat": "Chemistry", "front": "What is Saponification and Esterification?", "back": "Esterification: Ethanoic acid + Ethanol --Conc. H₂SO₄--> Ethyl ethanoate (sweet fruity ester) + H₂O.\nSaponification: Alkaline hydrolysis of ester: Ester + NaOH → Sodium salt of fatty acid (Soap) + Alcohol.", "hint": "Sweet smell vs soap making"}, {"id": "fc-9", "cat": "Biology", "front": "Name the plant hormones (phytohormones) and their primary functions.", "back": "• Auxin: Cell elongation & phototropism (shoot bending).\n• Gibberellin: Stem elongation & breaking seed dormancy.\n• Cytokinin: Promotes rapid cell division (fruits & seeds).\n• Abscisic Acid (ABA): Growth inhibitor, causes wilting & dormancy.", "hint": "Growth vs Inhibitor"}, {"id": "fc-10", "cat": "Biology", "front": "What are the enzymes in gastric juice and pancreatic juice?", "back": "Stomach (Gastric Juice): Pepsin (digests proteins in acidic pH 1.5-2).\nPancreas (Pancreatic Juice): Amylase (starch), Trypsin (proteins in alkaline pH), Lipase (emulsified fats).", "hint": "Stomach vs Pancreas"}, {"id": "fc-11", "cat": "Biology", "front": "What is the function of Bile Juice, and does it contain any digestive enzymes?", "back": "Bile juice contains NO enzymes! It contains bile salts that: (1) Emulsify large fat globules into tiny droplets for lipase action, and (2) Make acidic chyme alkaline for pancreatic enzymes.", "hint": "Liver secretion"}, {"id": "fc-12", "cat": "Biology", "front": "What is the difference between Aerobic and Anaerobic respiration in human muscle?", "back": "In rich oxygen (Mitochondria): Glucose → Pyruvate → CO₂ + H₂O + 38 ATP.\nIn lack of oxygen (Skeletal Muscle during heavy exercise): Glucose → Pyruvate → Lactic Acid + 2 ATP (causes painful muscle cramps).", "hint": "Lactic acid cramps"}, {"id": "fc-13", "cat": "Biology", "front": "What is the phenotypic and genotypic ratio of Mendel's monohybrid cross in F₂?", "back": "Phenotypic Ratio: 3 : 1 (3 Tall : 1 Dwarf).\nGenotypic Ratio: 1 : 2 : 1 (1 TT : 2 Tt : 1 tt).\nLaw illustrated: Law of Segregation.", "hint": "Pea plant height"}, {"id": "fc-14", "cat": "Biology", "front": "What is the phenotypic ratio of Mendel's dihybrid cross in F₂?", "back": "Phenotypic Ratio: 9 : 3 : 3 : 1\n(9 Round-Yellow : 3 Round-Green : 3 Wrinkled-Yellow : 1 Wrinkled-Green).\nLaw illustrated: Law of Independent Assortment.", "hint": "Two traits"}, {"id": "fc-15", "cat": "Biology", "front": "What is the 10% law of energy flow and who proposed it?", "back": "Proposed by Raymond Lindeman (1942).\nOnly ~10% of energy available at one trophic level is transferred to the next higher trophic level. The remaining 90% is lost as metabolic heat during respiration.", "hint": "Energy cascade"}, {"id": "fc-16", "cat": "Physics", "front": "State the sign convention rule for focal length of mirrors and lenses.", "back": "CONCAVE (mirror or lens) ⟹ f is ALWAYS NEGATIVE (−).\nCONVEX (mirror or lens) ⟹ f is ALWAYS POSITIVE (+).\nObject distance u is ALWAYS NEGATIVE (−) for both.", "hint": "Concave vs Convex"}, {"id": "fc-17", "cat": "Physics", "front": "What is the Mirror Formula vs Lens Formula?", "back": "Mirror Formula: 1/f = 1/v + 1/u  (Magnification m = −v/u = h'/h).\nLens Formula: 1/f = 1/v − 1/u  (Magnification m = +v/u = h'/h).", "hint": "Watch the plus and minus"}, {"id": "fc-18", "cat": "Physics", "front": "What are the anatomical causes and corrective lenses for Myopia and Hypermetropia?", "back": "Myopia (Short-sightedness): Image in FRONT of retina. Causes: Eyeball too long or cornea curvature too high. Correction: Concave lens (− power).\nHypermetropia (Long-sightedness): Image BEHIND retina. Causes: Eyeball too short or focal length too long. Correction: Convex lens (+ power).", "hint": "Eye defects"}, {"id": "fc-19", "cat": "Physics", "front": "What is Ohm's Law and its condition?", "back": "V = I R (Potential difference is directly proportional to current).\nCondition: Provided temperature and other physical parameters remain strictly constant!", "hint": "V = IR"}, {"id": "fc-20", "cat": "Physics", "front": "How does resistance of a wire change if its length is doubled by stretching?", "back": "When stretched to double length (l' = 2l), cross-sectional area halves (A' = A/2) because volume is constant.\nNew resistance R' = ρ(2l / (A/2)) = 4 × ρ(l/A) = 4 R.\nResistance increases 4 times (n² rule)!", "hint": "Volume is conserved"}, {"id": "fc-21", "cat": "Physics", "front": "What is 1 kilowatt-hour (kWh) in Joules?", "back": "1 kWh = 1 kW × 1 hour = 1000 W × 3600 seconds = 3,600,000 Joules = 3.6 × 10⁶ Joules (called 1 Board of Trade Unit).", "hint": "Commercial unit"}, {"id": "fc-22", "cat": "Physics", "front": "State Fleming's Left-Hand Rule mnemonic.", "back": "FBI on Left Hand:\n• F (Thumb): Direction of Force / Motion\n• B (Forefinger): Direction of Magnetic Field\n• I (Middle finger): Direction of Electric Current\nUsed in: Electric Motor.", "hint": "FBI"}, {"id": "fc-23", "cat": "Maths", "front": "What is the Fundamental Theorem of Arithmetic?", "back": "Every composite number can be expressed (factorised) as a unique product of primes, apart from the order in which the prime factors occur.", "hint": "Prime factorisation"}, {"id": "fc-24", "cat": "Maths", "front": "What is the discriminant rule for nature of roots in ax² + bx + c = 0?", "back": "D = b² − 4ac:\n• D > 0: Two distinct real roots\n• D = 0: Two equal real roots (roots = −b/2a)\n• D < 0: No real roots (complex roots).", "hint": "D = b² - 4ac"}, {"id": "fc-25", "cat": "Maths", "front": "State the three trigonometric Pythagorean identities.", "back": "1. sin² θ + cos² θ = 1\n2. 1 + tan² θ = sec² θ  (sec² θ − tan² θ = 1)\n3. 1 + cot² θ = cosec² θ  (cosec² θ − cot² θ = 1).", "hint": "Trig trinity"}, {"id": "fc-26", "cat": "Maths", "front": "What is Karl Pearson's empirical formula connecting Mean, Median, and Mode?", "back": "Mode = 3 Median − 2 Mean\n(Mnemonic: 3 has more letters, Median has more letters; 2 has fewer, Mean has fewer).", "hint": "3-2 rule"}, {"id": "fc-27", "cat": "Maths", "front": "What is the section formula for a point dividing a line in ratio m₁ : m₂?", "back": "x = (m₁ x₂ + m₂ x₁) / (m₁ + m₂)\ny = (m₁ y₂ + m₂ y₁) / (m₁ + m₂)\nMidpoint: ((x₁ + x₂)/2, (y₁ + y₂)/2).", "hint": "Cross multiplication of points"}, {"id": "fc-28", "cat": "Maths", "front": "State the circumscribing quadrilateral tangent property for a circle.", "back": "If quadrilateral ABCD circumscribes a circle, then:\nAB + CD = AD + BC\n(Sum of opposite pairs of sides is equal).", "hint": "Tangents from external point"}];
+
+(function(){
+  const css = "/* ================= FLAGSHIP v3 STYLES ================= */\n\n/* Light Theme Variables (Board Paper Mode) */\nbody.light-theme {\n  --bg: #f8fafc;\n  --panel: #ffffff;\n  --card: #f1f5f9;\n  --line: #cbd5e1;\n  --text: #0f172a;\n  --muted: #64748b;\n  --cyan: #0284c7;\n  --card-bg: #ffffff;\n}\nbody.light-theme .sidebar {\n  background: #ffffff;\n  border-right-color: #e2e8f0;\n}\nbody.light-theme .nav-item {\n  color: #475569;\n}\nbody.light-theme .nav-item.active {\n  background: rgba(2, 132, 199, 0.12);\n  color: #0284c7;\n}\nbody.light-theme .card, body.light-theme .v2d, body.light-theme .cm-qcard {\n  background: #ffffff;\n  border-color: #e2e8f0;\n  box-shadow: 0 1px 3px rgba(0,0,0,0.05);\n}\nbody.light-theme .cm-qtitle {\n  color: #0f172a;\n}\nbody.light-theme .cm-solution-box {\n  background: #f8fafc;\n  color: #1e293b;\n  border-left-color: #0284c7;\n}\nbody.light-theme .modal {\n  background: #ffffff;\n  color: #0f172a;\n  border: 1px solid #cbd5e1;\n}\n\n/* Theme Toggle Button */\n.theme-toggle-btn {\n  display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;\n  border-radius: 20px; font-size: 11.5px; font-weight: 700; cursor: pointer;\n  background: rgba(255, 255, 255, 0.08); border: 1px solid var(--line);\n  color: var(--text); transition: all 0.2s;\n}\n.theme-toggle-btn:hover {\n  background: var(--cyan); color: #0f172a; border-color: var(--cyan);\n}\n\n/* Flashcards UI */\n.fc-container {\n  max-width: 650px; margin: 0 auto; perspective: 1000px;\n}\n.fc-card {\n  width: 100%; min-height: 280px; position: relative;\n  transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);\n  cursor: pointer; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);\n}\n.fc-card.flipped {\n  transform: rotateY(180deg);\n}\n.fc-front, .fc-back {\n  position: absolute; width: 100%; height: 100%; top: 0; left: 0;\n  backface-visibility: hidden; border-radius: 16px; padding: 24px;\n  display: flex; flex-direction: column; justify-content: space-between;\n  border: 1px solid var(--line); box-sizing: border-box;\n}\n.fc-front {\n  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));\n  color: #f8fafc;\n}\nbody.light-theme .fc-front {\n  background: linear-gradient(135deg, #ffffff, #f1f5f9);\n  color: #0f172a;\n}\n.fc-back {\n  background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98));\n  transform: rotateY(180deg); color: #f1f5f9;\n}\nbody.light-theme .fc-back {\n  background: linear-gradient(135deg, #f8fafc, #ffffff);\n  color: #0f172a;\n}\n.fc-badge {\n  display: inline-block; padding: 4px 10px; border-radius: 6px;\n  font-size: 11px; font-weight: 800; background: rgba(56, 189, 248, 0.15);\n  color: var(--cyan); border: 1px solid rgba(56, 189, 248, 0.3);\n}\n.fc-content {\n  font-size: 17px; font-weight: 600; line-height: 1.6; margin: auto 0;\n  white-space: pre-wrap;\n}\n.fc-controls {\n  display: flex; gap: 12px; justify-content: center; margin-top: 20px;\n}\n.fc-btn {\n  padding: 10px 20px; border-radius: 10px; font-size: 13.5px; font-weight: 700;\n  cursor: pointer; border: none; transition: transform 0.15s, opacity 0.15s;\n  display: flex; align-items: center; gap: 6px;\n}\n.fc-btn:hover { transform: translateY(-2px); }\n.fc-btn-again { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }\n.fc-btn-good { background: #10b981; color: #ffffff; }\n\n/* Focus Desk / Pomodoro */\n.focus-card {\n  background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.8));\n  border: 1px solid var(--line); border-radius: 16px; padding: 20px 24px;\n  margin-bottom: 20px;\n}\n.focus-time-display {\n  font-size: 48px; font-weight: 900; font-family: monospace;\n  color: var(--cyan); text-align: center; margin: 12px 0; letter-spacing: 2px;\n}\n.sound-selector {\n  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 14px 0;\n}\n.sound-chip {\n  padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700;\n  cursor: pointer; background: rgba(255,255,255,0.06); border: 1px solid var(--line);\n  color: var(--muted); transition: all 0.2s;\n}\n.sound-chip.active {\n  background: var(--cyan); color: #0f172a; border-color: var(--cyan);\n}\n\n/* Sample Papers */\n.paper-header {\n  border-bottom: 2px dashed var(--line); padding-bottom: 16px; margin-bottom: 20px;\n}\n.time-strat-grid {\n  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));\n  gap: 10px; margin: 14px 0 20px;\n}\n.time-strat-box {\n  background: rgba(255,255,255,0.04); border: 1px solid var(--line);\n  border-radius: 10px; padding: 10px 14px;\n}\n.time-strat-box .phase { font-size: 12px; font-weight: 800; color: var(--cyan); }\n.time-strat-box .dur { font-size: 16px; font-weight: 900; color: #f8fafc; margin: 2px 0; }\nbody.light-theme .time-strat-box .dur { color: #0f172a; }\n.time-strat-box .act { font-size: 11.5px; color: var(--muted); line-height: 1.4; }\n\n/* Bookmarks */\n.bm-star-btn {\n  background: none; border: none; font-size: 16px; cursor: pointer;\n  padding: 4px 8px; border-radius: 6px; transition: transform 0.2s;\n}\n.bm-star-btn:hover { transform: scale(1.2); }\n.bm-star-btn.saved { color: #fbbf24; }\n\n/* Print Styles */\n@media print {\n  .sidebar, .bottomnav, .topbar, .cm-btn-row, .fc-controls, .theme-toggle-btn, button {\n    display: none !important;\n  }\n  body, .main, .card {\n    background: #ffffff !important;\n    color: #000000 !important;\n    border: none !important;\n    box-shadow: none !important;\n    width: 100% !important;\n    padding: 0 !important;\n    margin: 0 !important;\n  }\n  .cm-solution-box, .cm-marking-box {\n    display: block !important;\n    color: #000000 !important;\n    background: #f8f9fa !important;\n    border: 1px solid #ccc !important;\n  }\n}\n";
+  const st = document.createElement('style');
+  st.id = 'flagship-v3-styles';
+  st.textContent = css;
+  document.head.appendChild(st);
+})();
+
+
+// State initialisation for v3
+if(!state.bookmarks) state.bookmarks = { questions: [], formulas: [], practicals: [] };
+if(!state.flashcardStats) state.flashcardStats = { known: {}, review: {} };
+if(!state.focusMinutes) state.focusMinutes = 0;
+
+// ================= THEME SWITCHER =================
+window.initTheme = function(){
+  const savedTheme = localStorage.getItem("tws_theme") || "dark";
+  if(savedTheme === "light"){
+    document.body.classList.add("light-theme");
+  } else {
+    document.body.classList.remove("light-theme");
+  }
+};
+window.toggleTheme = function(){
+  const isLight = document.body.classList.toggle("light-theme");
+  localStorage.setItem("tws_theme", isLight ? "light" : "dark");
+  toast(isLight ? "☀️ Board Paper Mode enabled" : "🌙 Midnight Dark Mode enabled");
+  updateThemeButtons();
+};
+function updateThemeButtons(){
+  const isLight = document.body.classList.contains("light-theme");
+  document.querySelectorAll(".theme-toggle-btn").forEach(btn => {
+    btn.innerHTML = isLight ? "🌙 Dark Mode" : "☀️ Light Mode";
+  });
+}
+
+// ================= BOOKMARK SYSTEM =================
+window.isBookmarked = function(type, id){
+  if(!state.bookmarks || !state.bookmarks[type]) return false;
+  return state.bookmarks[type].some(item => item.id === id);
+};
+
+window.toggleBookmark = function(type, id, title, content){
+  if(!state.bookmarks) state.bookmarks = { questions: [], formulas: [], practicals: [] };
+  if(!state.bookmarks[type]) state.bookmarks[type] = [];
+
+  const idx = state.bookmarks[type].findIndex(item => item.id === id);
+  if(idx > -1){
+    state.bookmarks[type].splice(idx, 1);
+    toast("Bookmark removed 🗑️");
+  } else {
+    state.bookmarks[type].push({ id, title, content, date: new Date().toLocaleDateString() });
+    toast("Saved to Revision Vault 🔖 (+2 XP)");
+    addXP(2);
+  }
+  save();
+  renderBookmarks();
+  updateBookmarkBadges();
+};
+
+function updateBookmarkBadges(){
+  const count = (state.bookmarks.questions?.length || 0) + (state.bookmarks.formulas?.length || 0) + (state.bookmarks.practicals?.length || 0);
+  const badge = document.getElementById("navBookmarksBadge");
+  if(badge) badge.textContent = count > 0 ? count : "";
+}
+
+window.renderBookmarks = function(){
+  const b = $("bookmarksBody");
+  if(!b) return;
+
+  const qList = state.bookmarks.questions || [];
+  const fList = state.bookmarks.formulas || [];
+  const pList = state.bookmarks.practicals || [];
+  const total = qList.length + fList.length + pList.length;
+
+  if(total === 0){
+    b.innerHTML = `
+      <div class="card text-center" style="padding:40px 20px">
+        <div style="font-size:42px; margin-bottom:12px">🔖</div>
+        <h3 style="font-size:20px; font-weight:800; margin-bottom:6px">Your Personal Revision Vault is Empty</h3>
+        <p class="muted" style="max-width:480px; margin:0 auto 16px; font-size:13.5px; line-height:1.5">
+          Tap the 🔖 bookmark icon on any challenging question, tricky formula, or experiment to collect them here for last-minute exam revision!
+        </p>
+        <button class="btn primary" onclick="switchView('learn')">Explore Syllabus & Bookmark Qs</button>
+      </div>
+    `;
+    return;
+  }
+
+  b.innerHTML = `
+    <div class="card mb">
+      <div class="flex spread" style="align-items:center; flex-wrap:wrap">
+        <div>
+          <h2 style="font-size:22px; font-weight:800; margin-bottom:4px">🔖 My Revision Vault (${total} Saved)</h2>
+          <div class="small muted">Review your curated weak spots and key items before entering the exam hall.</div>
+        </div>
+        <div class="flex" style="gap:8px; margin-top:8px">
+          <button class="btn sm primary" onclick="window.print()">🖨️ Print Revision Sheet</button>
+          <button class="btn sm ghost" onclick="clearAllBookmarks()">Clear All</button>
+        </div>
+      </div>
+    </div>
+
+    ${qList.length ? `
+      <div class="card mb">
+        <h3><span class="em">📝</span> Saved Questions (${qList.length})</h3>
+        ${qList.map(item => `
+          <div class="def" style="margin-bottom:10px; border-left:3px solid var(--cyan)">
+            <div class="flex spread" style="align-items:flex-start">
+              <div class="bold" style="color:#f8fafc; font-size:14px">${esc(item.title)}</div>
+              <button class="bm-star-btn saved" title="Remove" onclick="toggleBookmark('questions', '${esc(item.id)}')">✕</button>
+            </div>
+            <div class="small" style="color:#cbd5e1; margin-top:6px; line-height:1.5">${esc(item.content)}</div>
+          </div>
+        `).join("")}
+      </div>
+    ` : ''}
+
+    ${fList.length ? `
+      <div class="card mb">
+        <h3><span class="em">📐</span> Saved Formulas (${fList.length})</h3>
+        ${fList.map(item => `
+          <div class="formula" style="margin-bottom:8px">
+            <span class="f">${esc(item.title)}</span>
+            <span class="n">${esc(item.content)}</span>
+            <button class="bm-star-btn saved" title="Remove" style="margin-left:auto" onclick="toggleBookmark('formulas', '${esc(item.id)}')">✕</button>
+          </div>
+        `).join("")}
+      </div>
+    ` : ''}
+
+    ${pList.length ? `
+      <div class="card mb">
+        <h3><span class="em">🧪</span> Saved Experiments (${pList.length})</h3>
+        ${pList.map(item => `
+          <div class="def" style="margin-bottom:8px">
+            <div class="flex spread">
+              <span class="bold">${esc(item.title)}</span>
+              <button class="bm-star-btn saved" title="Remove" onclick="toggleBookmark('practicals', '${esc(item.id)}')">✕</button>
+            </div>
+            <div class="small muted" style="margin-top:4px">${esc(item.content)}</div>
+          </div>
+        `).join("")}
+      </div>
+    ` : ''}
+  `;
+};
+
+window.clearAllBookmarks = function(){
+  if(!confirm("Clear all items in your Revision Vault?")) return;
+  state.bookmarks = { questions: [], formulas: [], practicals: [] };
+  save();
+  renderBookmarks();
+  updateBookmarkBadges();
+  toast("Revision Vault cleared");
+};
+
+// ================= FLASHCARDS SYSTEM =================
+let fcIndex = 0;
+let fcFiltered = FLASHCARDS;
+
+window.renderFlashcards = function(){
+  const body = $("flashcardsBody");
+  if(!body) return;
+
+  const current = fcFiltered[fcIndex] || fcFiltered[0];
+  const knownCount = Object.keys(state.flashcardStats.known || {}).length;
+
+  body.innerHTML = `
+    <div class="card mb">
+      <div class="flex spread" style="align-items:center; flex-wrap:wrap">
+        <div>
+          <h2 style="font-size:22px; font-weight:800; margin-bottom:4px">⚡ Rapid Recall Flashcards</h2>
+          <div class="small muted">Active recall for high-yield definitions, formula values, and reaction colours.</div>
+        </div>
+        <div class="flex" style="gap:8px; align-items:center">
+          <span class="tag low">Card ${fcIndex + 1} of ${fcFiltered.length}</span>
+          <span class="tag high">Mastered: ${knownCount}</span>
+        </div>
+      </div>
+      <div class="cm-pill-bar" style="margin-top:12px">
+        <button class="cm-pill active" onclick="filterFCCat('all', this)">All Subjects</button>
+        <button class="cm-pill" onclick="filterFCCat('Chemistry', this)">🧪 Chemistry</button>
+        <button class="cm-pill" onclick="filterFCCat('Biology', this)">🌿 Biology</button>
+        <button class="cm-pill" onclick="filterFCCat('Physics', this)">⚡ Physics</button>
+        <button class="cm-pill" onclick="filterFCCat('Maths', this)">🧮 Maths</button>
+      </div>
+    </div>
+
+    <div class="fc-container">
+      <div class="fc-card" id="activeFCCard" onclick="flipActiveFC()">
+        <div class="fc-front">
+          <div class="flex spread">
+            <span class="fc-badge">${esc(current.cat)}</span>
+            <span class="small muted">Tap to flip 🔄</span>
+          </div>
+          <div class="fc-content">${esc(current.front)}</div>
+          <div class="small muted">💡 Hint: ${esc(current.hint || 'Recall carefully')}</div>
+        </div>
+        <div class="fc-back">
+          <div class="flex spread">
+            <span class="fc-badge" style="background:rgba(16,185,129,0.2); color:#10b981; border-color:rgba(16,185,129,0.4)">Answer Key</span>
+            <span class="small muted">Tap to flip back 🔄</span>
+          </div>
+          <div class="fc-content" style="font-size:15px">${esc(current.back)}</div>
+          <div class="small muted">Self-assessment</div>
+        </div>
+      </div>
+
+      <div class="fc-controls">
+        <button class="fc-btn fc-btn-again" onclick="answerFC(false)">
+          🔁 Need Review
+        </button>
+        <button class="fc-btn fc-btn-good" onclick="answerFC(true)">
+          👍 Got It Right (+5 XP)
+        </button>
+      </div>
+    </div>
+  `;
+};
+
+window.flipActiveFC = function(){
+  const card = document.getElementById("activeFCCard");
+  if(card) card.classList.toggle("flipped");
+};
+
+window.filterFCCat = function(cat, btn){
+  if(btn && btn.parentElement){
+    btn.parentElement.querySelectorAll('.cm-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  fcFiltered = (cat === 'all') ? FLASHCARDS : FLASHCARDS.filter(c => c.cat === cat);
+  fcIndex = 0;
+  renderFlashcards();
+};
+
+window.answerFC = function(known){
+  const current = fcFiltered[fcIndex];
+  if(known){
+    state.flashcardStats.known[current.id] = true;
+    addXP(5);
+    toast("Mastered! +5 XP 🌟");
+  } else {
+    state.flashcardStats.review[current.id] = true;
+    toast("Scheduled for review 🔁");
+  }
+  save();
+
+  fcIndex = (fcIndex + 1) % fcFiltered.length;
+  renderFlashcards();
+};
+
+// ================= FOCUS DESK / POMODORO WITH WEB AUDIO =================
+let focusTimerInterval = null;
+let focusSecondsLeft = 25 * 60;
+let focusIsRunning = false;
+let currentAudioNode = null;
+let audioCtx = null;
+
+function getAudioContext(){
+  if(!audioCtx){
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if(AudioContext) audioCtx = new AudioContext();
+  }
+  if(audioCtx && audioCtx.state === 'suspended'){
+    audioCtx.resume();
+  }
+  return audioCtx;
+}
+
+window.playAmbientSound = function(type){
+  stopAmbientSound();
+  if(type === 'none') return;
+  const ctx = getAudioContext();
+  if(!ctx) return;
+
+  // Synthesize ambient sounds using Web Audio API (zero network files!)
+  const bufferSize = ctx.sampleRate * 2;
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+
+  if(type === 'rain'){
+    // Pink noise with low-pass filter
+    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+    for(let i = 0; i < bufferSize; i++){
+      const white = Math.random() * 2 - 1;
+      b0 = 0.99886 * b0 + white * 0.0555179;
+      b1 = 0.99332 * b1 + white * 0.0750759;
+      b2 = 0.96900 * b2 + white * 0.1538520;
+      data[i] = (b0 + b1 + b2) * 0.12;
+    }
+  } else if(type === 'ocean'){
+    // Modulated brownian noise
+    let lastOut = 0.0;
+    for(let i = 0; i < bufferSize; i++){
+      const white = Math.random() * 2 - 1;
+      data[i] = (lastOut + (0.02 * white)) / 1.02;
+      lastOut = data[i];
+      data[i] *= 0.35;
+    }
+  }
+
+  const noise = ctx.createBufferSource();
+  noise.buffer = buffer;
+  noise.loop = true;
+
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(type === 'rain' ? 800 : 400, ctx.currentTime);
+
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.2, ctx.currentTime);
+
+  noise.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+  noise.start(0);
+
+  currentAudioNode = { noise, gain };
+};
+
+window.stopAmbientSound = function(){
+  if(currentAudioNode){
+    try {
+      currentAudioNode.noise.stop();
+      currentAudioNode.noise.disconnect();
+    } catch(e){}
+    currentAudioNode = null;
+  }
+};
+
+function playChime(){
+  const ctx = getAudioContext();
+  if(!ctx) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+  osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.8); // A5
+  gain.gain.setValueAtTime(0.3, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 1.2);
+}
+
+window.renderFocusDesk = function(){
+  const body = $("focusDeskBody");
+  if(!body) return;
+
+  const mins = Math.floor(focusSecondsLeft / 60);
+  const secs = focusSecondsLeft % 60;
+  const timeStr = String(mins).padStart(2, '0') + ":" + String(secs).padStart(2, '0');
+
+  body.innerHTML = `
+    <div class="card mb">
+      <div class="flex spread" style="align-items:center">
+        <div>
+          <h2 style="font-size:22px; font-weight:800; margin-bottom:4px">⏱️ Study Desk Focus Mode</h2>
+          <div class="small muted">25-minute Pomodoro study intervals with offline calming soundscapes.</div>
+        </div>
+        <span class="tag high">Total Focused: ${state.focusMinutes || 0} min</span>
+      </div>
+    </div>
+
+    <div class="focus-card">
+      <div class="focus-time-display" id="focusTimeDisplay">${timeStr}</div>
+
+      <div class="flex" style="justify-content:center; gap:12px; margin-bottom:16px">
+        <button class="btn primary" onclick="toggleFocusTimer()">
+          ${focusIsRunning ? '⏸️ Pause Focus' : '▶️ Start 25m Session'}
+        </button>
+        <button class="btn ghost" onclick="resetFocusTimer()">
+          🔄 Reset (25m)
+        </button>
+      </div>
+
+      <div class="text-center small muted" style="margin-bottom:8px">🎧 Focus Soundscape (100% Offline):</div>
+      <div class="sound-selector">
+        <button class="sound-chip active" onclick="setSound('none', this)">🔕 Silent</button>
+        <button class="sound-chip" onclick="setSound('rain', this)">🌧️ Gentle Rain</button>
+        <button class="sound-chip" onclick="setSound('ocean', this)">🌊 Ocean Waves</button>
+      </div>
+    </div>
+  `;
+};
+
+window.toggleFocusTimer = function(){
+  if(focusIsRunning){
+    clearInterval(focusTimerInterval);
+    focusIsRunning = false;
+    stopAmbientSound();
+  } else {
+    focusIsRunning = true;
+    focusTimerInterval = setInterval(() => {
+      focusSecondsLeft--;
+      const disp = document.getElementById("focusTimeDisplay");
+      if(disp){
+        const mins = Math.floor(focusSecondsLeft / 60);
+        const secs = focusSecondsLeft % 60;
+        disp.textContent = String(mins).padStart(2, '0') + ":" + String(secs).padStart(2, '0');
+      }
+      if(focusSecondsLeft <= 0){
+        clearInterval(focusTimerInterval);
+        focusIsRunning = false;
+        playChime();
+        stopAmbientSound();
+        state.focusMinutes = (state.focusMinutes || 0) + 25;
+        addXP(10);
+        save();
+        toast("🎉 Focus session complete! Take a 5-min break. (+10 XP)");
+        focusSecondsLeft = 25 * 60;
+        renderFocusDesk();
+      }
+    }, 1000);
+  }
+  renderFocusDesk();
+};
+
+window.resetFocusTimer = function(){
+  clearInterval(focusTimerInterval);
+  focusIsRunning = false;
+  focusSecondsLeft = 25 * 60;
+  stopAmbientSound();
+  renderFocusDesk();
+};
+
+window.setSound = function(type, btn){
+  if(btn && btn.parentElement){
+    btn.parentElement.querySelectorAll('.sound-chip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  playAmbientSound(type);
+};
+
+// ================= OFFICIAL CBSE SAMPLE PAPERS =================
+let activePaperIdx = 0;
+let paperSectionFilter = 'all';
+
+window.renderPapers = function(){
+  const body = $("papersBody");
+  if(!body) return;
+
+  const paper = SAMPLE_PAPERS[activePaperIdx] || SAMPLE_PAPERS[0];
+
+  body.innerHTML = `
+    <div class="card mb">
+      <div class="flex spread" style="align-items:center; flex-wrap:wrap">
+        <div>
+          <span class="tag ${paper.subject}">${paper.subject === 'maths' ? '🧮 Mathematics' : '🔬 Science'} · Code ${paper.code}</span>
+          <h2 style="font-size:24px; font-weight:800; margin:8px 0 4px">${esc(paper.title)}</h2>
+          <div class="small muted">Time: ${paper.time} · Maximum Marks: ${paper.maxMarks} · Latest 2025–26 Pattern</div>
+        </div>
+        <div class="flex" style="gap:8px; margin-top:8px">
+          ${SAMPLE_PAPERS.map((p, idx) => `
+            <button class="btn sm ${activePaperIdx === idx ? 'primary' : 'ghost'}" onclick="selectPaper(${idx})">
+              ${p.subject === 'maths' ? '🧮 Maths Paper' : '🔬 Science Paper'}
+            </button>
+          `).join("")}
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb">
+      <h3><span class="em">⏱️</span> 3-Hour Board Exam Time Management Strategy</h3>
+      <div class="small muted mb" style="margin-bottom:12px">How CBSE State Rankers budget every single minute of the 180-minute paper.</div>
+      <div class="time-strat-grid">
+        ${paper.timeStrategy.map(ts => `
+          <div class="time-strat-box">
+            <div class="phase">${esc(ts.phase)}</div>
+            <div class="dur">${esc(ts.duration)}</div>
+            <div class="act">${esc(ts.action)}</div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+
+    <div class="card mb">
+      <div class="flex spread" style="align-items:center; flex-wrap:wrap">
+        <div>
+          <h3 style="margin-bottom:4px"><span class="em">📑</span> Official Question Paper with Marking Scheme</h3>
+          <div class="small muted">Filter by section to review model answers and step-by-step scoring rules.</div>
+        </div>
+        <div class="cm-pill-bar" style="margin:4px 0">
+          <button class="cm-pill ${paperSectionFilter === 'all' ? 'active' : ''}" onclick="filterPaperSection('all', this)">All Sections</button>
+          <button class="cm-pill ${paperSectionFilter === 'Section A' ? 'active' : ''}" onclick="filterPaperSection('Section A', this)">Section A (MCQs)</button>
+          <button class="cm-pill ${paperSectionFilter === 'Section B' ? 'active' : ''}" onclick="filterPaperSection('Section B', this)">Section B (2M)</button>
+          <button class="cm-pill ${paperSectionFilter === 'Section C' ? 'active' : ''}" onclick="filterPaperSection('Section C', this)">Section C (3M)</button>
+          <button class="cm-pill ${paperSectionFilter === 'Section D' ? 'active' : ''}" onclick="filterPaperSection('Section D', this)">Section D (5M)</button>
+          <button class="cm-pill ${paperSectionFilter === 'Section E' ? 'active' : ''}" onclick="filterPaperSection('Section E', this)">Section E (Case Study)</button>
+        </div>
+      </div>
+
+      <div id="paperContent">
+        ${renderPaperSectionsHTML(paper, paperSectionFilter)}
+      </div>
+    </div>
+  `;
+};
+
+window.selectPaper = function(idx){
+  activePaperIdx = idx;
+  paperSectionFilter = 'all';
+  renderPapers();
+};
+
+window.filterPaperSection = function(sec, btn){
+  paperSectionFilter = sec;
+  if(btn && btn.parentElement){
+    btn.parentElement.querySelectorAll('.cm-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  const paper = SAMPLE_PAPERS[activePaperIdx];
+  const container = document.getElementById("paperContent");
+  if(container) container.innerHTML = renderPaperSectionsHTML(paper, sec);
+};
+
+function renderPaperSectionsHTML(paper, filterSec){
+  const secs = (filterSec === 'all') ? paper.sections : paper.sections.filter(s => s.name === filterSec);
+
+  return secs.map(sec => `
+    <div style="margin-top:20px; border-top:1px solid var(--line); padding-top:16px">
+      <div class="flex spread" style="align-items:center; margin-bottom:12px">
+        <h4 style="font-size:16px; font-weight:800; color:var(--cyan)">${esc(sec.name)}</h4>
+        <span class="small muted">${esc(sec.desc)}</span>
+      </div>
+
+      ${sec.questions.map(q => {
+        const qid = `pq-${paper.id}-${q.qNum}`;
+        return `
+          <div class="cm-qcard">
+            <div class="flex spread">
+              <span class="cm-badge cm-badge-l2">Q${q.qNum} · ${esc(q.marks)}</span>
+              <button class="bm-star-btn ${isBookmarked('questions', qid) ? 'saved' : ''}" onclick="toggleBookmark('questions', '${qid}', 'Q${q.qNum} (${paper.title})', '${esc(q.q || q.passage)}')">
+                ${isBookmarked('questions', qid) ? '★ Saved' : '☆ Bookmark'}
+              </button>
+            </div>
+
+            ${q.passage ? `<div style="margin:10px 0; padding:12px; background:rgba(0,0,0,0.25); border-radius:8px; font-size:13px; line-height:1.55; color:#cbd5e1"><strong>Passage:</strong> ${esc(q.passage)}</div>` : ''}
+
+            <div class="cm-qtitle">${esc(q.q || '')}</div>
+
+            ${q.options ? `
+              <div style="margin:10px 0">
+                ${q.options.map((opt, oi) => `
+                  <div style="padding:4px 0; font-size:13px; color:var(--muted)">
+                    <span style="font-weight:700; color:#cbd5e1">(${String.fromCharCode(65+oi)})</span> ${esc(opt)}
+                  </div>
+                `).join("")}
+              </div>
+            ` : ''}
+
+            ${q.subQuestions ? `
+              <div style="margin:10px 0">
+                ${q.subQuestions.map((sq, si) => `
+                  <div style="margin-bottom:8px; padding:8px 12px; background:rgba(255,255,255,0.03); border-radius:6px">
+                    <div class="bold small" style="color:#e2e8f0">${esc(sq.q)}</div>
+                    <div class="small" style="color:#34d399; margin-top:4px">Ans: ${esc(sq.a)}</div>
+                  </div>
+                `).join("")}
+              </div>
+            ` : ''}
+
+            <div class="cm-btn-row">
+              ${q.stepMarking ? `<button class="cm-btn" onclick="toggleCoachingScheme('${qid}')">📋 CBSE Marking Scheme</button>` : ''}
+              ${(q.solution || q.explanation) ? `<button class="cm-btn ghost" onclick="toggleCoachingSol('${qid}')">💡 Model Answer & Solution</button>` : ''}
+            </div>
+
+            ${q.stepMarking ? `
+              <div id="${qid}-scheme" class="cm-marking-box">
+                <div class="small bold" style="color:#fbbf24; margin-bottom:8px">⚖️ CBSE Official Step-by-Step Marking Breakdown</div>
+                ${q.stepMarking.map(s => `
+                  <div class="cm-marking-step">
+                    <span class="cm-step-txt">• ${esc(s.step)}</span>
+                    <span class="cm-step-tag">${esc(s.marks)}</span>
+                  </div>
+                `).join("")}
+              </div>
+            ` : ''}
+
+            ${(q.solution || q.explanation) ? `
+              <div id="${qid}-sol" class="cm-solution-box">
+                <div class="small bold" style="color:#38bdf8; margin-bottom:6px">📝 Model Solution / Explanation:</div>
+                ${esc(q.solution || q.explanation)}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `).join("");
+}
+
+// Wrap switchView to lazy-render v3 views
+const _origSwitchViewV3 = window.switchView;
+window.switchView = function(viewId){
+  _origSwitchViewV3(viewId);
+  if(viewId === 'papers') renderPapers();
+  if(viewId === 'flashcards') renderFlashcards();
+  if(viewId === 'bookmarks') renderBookmarks();
+  if(viewId === 'focusDesk') renderFocusDesk();
+};
+
+// Initialise theme on boot
+initTheme();
+updateBookmarkBadges();
 
 </script>
 </body>

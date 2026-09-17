@@ -61,3 +61,11 @@ Progress is stored in the browser's local storage on that device. Use **Settings
     - **Level 2: Board Target (PYQ) with Official CBSE Step-by-Step Marking Scheme**
     - **Level 3: HOTS Challenger (Exemplar / Olympiad Level)**
   - Full model solutions with step-by-step scoring breakdown drawers and topper tips.
+
+## 🚀 v3 All-in-One Flagship Study Suite
+
+- 📑 **CBSE Official Sample Papers & Board Simulator** — Complete 80-mark authentic board model papers (Maths Standard 041 & Science 086) with Section A–E breakdown, step-by-step marking rubrics, and the 180-minute State Ranker Time Management Strategy.
+- ⚡ **Rapid Recall 3D Flashcards** — Interactive flip cards across Chemistry colours, Biology hormones/enzymes, Physics units/laws, and Maths formulas with active spaced repetition (+5 XP).
+- 🔖 **Personal Revision Vault & Bookmarks** — Save challenging questions, tricky formulas, and experiments with one tap to build your custom night-before-exam revision notebook, complete with 🖨️ Print / PDF export.
+- ⏱️ **Study Desk Focus Mode (Pomodoro)** — 25-minute study intervals with 100% offline synthesized ambient soundscapes (Gentle Rain, Ocean Waves, Forest Breeze) via Web Audio API.
+- 🌓 **Day & Night Themes** — Seamless toggle between Midnight Dark Mode and Board Paper Light Mode.
