@@ -1,5 +1,5 @@
 /* TWS STUDIES — service worker (offline support + app-shell caching) */
-const CACHE = "tws-studies-v8";
+const CACHE = "tws-studies-v9";
 const ASSETS = [
   "./",
   "./index.html",
