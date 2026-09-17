@@ -593,7 +593,18 @@ canvas{max-width:100%}
         <div><h1>🧭 My Study Plan</h1>
         <div class="sub">Auto-built around your exam date — highest-marks chapters first, 10-day final phase</div></div>
       </div>
-      <div id="plannerBody"></div>
+      <div class="cm-pill-bar" style="margin-bottom:16px">
+        <button class="cm-pill active" onclick="switchPlannerTab('custom', this)">✋ Drag & Drop Daily Routine</button>
+        <button class="cm-pill" onclick="switchPlannerTab('auto', this)">📅 Board Countdown Roadmap</button>
+      </div>
+
+      <div id="plannerCustomView">
+        <div id="plannerModeContainer"></div>
+      </div>
+
+      <div id="plannerAutoView" style="display:none">
+        <div id="plannerBody"></div>
+      </div>
     </section>
 
     <!-- FORMULA BOOK -->
@@ -5918,7 +5929,12 @@ window.openSettings=function(){
   if(box && !$("setRerunOb")){
     box.insertAdjacentHTML("beforeend",
       `<div class="sec-label">🚀 Welcome setup</div>
-       <button class="btn sm" id="setRerunOb" onclick="closeSettings();state.onboarded=false;save();showOnboarding(0)">Re-run welcome setup</button>`);
+       <div class="sec-label">💾 Cloud & Device Backup</div>
+       <div class="flex" style="gap:8px; margin-bottom:14px; flex-wrap:wrap">
+         <button class="btn sm primary" onclick="exportUserData()">📥 Export My Backup (.json)</button>
+         <button class="btn sm ghost" onclick="importUserData()">📤 Restore from Backup</button>
+       </div>
+       <button class="btn sm" id="setRerunOb"  onclick="closeSettings();state.onboarded=false;save();showOnboarding(0)">Re-run welcome setup</button>`);
   }
 };
 
@@ -7025,6 +7041,7 @@ window.switchView = function(viewId){
   if(viewId === 'flashcards') renderFlashcards();
   if(viewId === 'bookmarks') renderBookmarks();
   if(viewId === 'focusDesk') renderFocusDesk();
+  if(viewId === 'planner') { if(plannerTab === 'custom') renderCustomPlanner(); else renderPlanner(); }
 };
 
 // Initialise theme on boot
@@ -7106,6 +7123,542 @@ if(sessionStorage.getItem("hide_install_banner") === "1" || (window.matchMedia &
   }, 100);
 }
 
+
+/* ===== DRAG & DROP CUSTOM PLANNER INJECTION ===== */
+/* ================= DRAG & DROP CUSTOM PLANNER + STORAGE RECOVERY ================= */
+
+// CSS for drag & drop planner + formula readability fixes
+(function(){
+  const css = `
+  /* Formula Readability & Alignment Fixes */
+  .formula {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.9)) !important;
+    border: 1px solid rgba(56, 189, 248, 0.3) !important;
+    border-radius: 12px !important;
+    padding: 14px 18px !important;
+    margin-bottom: 12px !important;
+    font-family: inherit !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    align-items: flex-start !important;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .formula:hover {
+    border-color: rgba(56, 189, 248, 0.6) !important;
+    transform: translateY(-1px);
+  }
+  .formula .f {
+    color: #38bdf8 !important;
+    font-size: 15.5px !important;
+    font-weight: 700 !important;
+    font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace !important;
+    line-height: 1.5 !important;
+    letter-spacing: 0.02em !important;
+    word-break: break-word !important;
+  }
+  .formula .n {
+    color: #94a3b8 !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+  }
+  body.light-theme .formula {
+    background: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+  }
+  body.light-theme .formula .f {
+    color: #0284c7 !important;
+  }
+  body.light-theme .formula .n {
+    color: #475569 !important;
+  }
+
+  /* Table styling readability */
+  .ctable {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    border: 1px solid var(--line) !important;
+  }
+  .ctable th, .ctable td {
+    padding: 10px 14px !important;
+    text-align: left !important;
+    font-size: 13px !important;
+    border-bottom: 1px solid var(--line) !important;
+  }
+  .ctable th {
+    background: rgba(56, 189, 248, 0.12) !important;
+    color: var(--cyan) !important;
+    font-weight: 800 !important;
+  }
+  .ctable tr:last-child td {
+    border-bottom: none !important;
+  }
+  .ctable td:first-child, .ctable th:first-child {
+    font-weight: 700 !important;
+  }
+
+  /* Drag & Drop Planner UI */
+  .dd-container {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 16px;
+    align-items: start;
+    margin-top: 14px;
+  }
+  @media(max-width: 860px){
+    .dd-container { grid-template-columns: 1fr; }
+  }
+
+  .dd-drawer {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .dd-subject-chip {
+    padding: 9px 13px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    user-select: none;
+    transition: transform 0.15s, box-shadow 0.15s;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .dd-subject-chip:active {
+    cursor: grabbing;
+    transform: scale(0.97);
+  }
+  .dd-subject-chip.maths {
+    background: rgba(79, 140, 255, 0.15);
+    color: #60a5fa;
+    border-color: rgba(79, 140, 255, 0.35);
+  }
+  .dd-subject-chip.science {
+    background: rgba(34, 211, 238, 0.15);
+    color: #38bdf8;
+    border-color: rgba(34, 211, 238, 0.35);
+  }
+
+  .dd-slot-card {
+    background: var(--panel);
+    border: 2px dashed var(--line);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: all 0.2s;
+  }
+  .dd-slot-card.drag-over {
+    border-color: var(--cyan);
+    background: rgba(56, 189, 248, 0.08);
+  }
+  .dd-slot-card.filled {
+    border-style: solid;
+    border-color: var(--line);
+  }
+  .dd-slot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .dd-slot-time {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: var(--cyan);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dd-slot-actions {
+    display: flex;
+    gap: 6px;
+  }
+  .dd-slot-content {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+  }
+  .dd-slot-empty {
+    width: 100%;
+    text-align: center;
+    padding: 12px;
+    color: var(--muted);
+    font-size: 13px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.02);
+  }
+  `;
+
+  const st = document.createElement("style");
+  st.id = "flagship-dd-styles";
+  st.textContent = css;
+  document.head.appendChild(st);
+})();
+
+// Backup & Cloud Export / Import
+window.exportUserData = function(){
+  const data = {
+    profile: activeProfile(),
+    state: state,
+    timestamp: new Date().toISOString()
+  };
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `tws_studies_backup_${dstr()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("💾 Progress data exported successfully!");
+};
+
+window.importUserData = function(){
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".json";
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const parsed = JSON.parse(evt.target.result);
+        if(parsed && parsed.state){
+          state = Object.assign(state, parsed.state);
+          save();
+          toast("✅ Data restored successfully! Reloading…");
+          setTimeout(() => location.reload(), 800);
+        } else {
+          alert("Invalid backup file format.");
+        }
+      } catch(err){
+        alert("Failed to parse backup file.");
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+};
+
+// ================= DRAG & DROP CUSTOM PLANNER STATE & CONTROLLERS =================
+if(!state.customPlan){
+  state.customPlan = {
+    slots: [
+      { id: "s1", time: "06:00 - 07:30 AM", label: "🌅 Early Morning Focus", subject: "maths", topic: "Quadratic Equations & AP Practice", done: false },
+      { id: "s2", time: "04:30 - 06:00 PM", label: "☀️ After School Practice", subject: "science", topic: "Chemical Reactions (Balancing & Types)", done: false },
+      { id: "s3", time: "07:30 - 09:00 PM", label: "🌙 Evening Concept Booster", subject: "maths", topic: "Trigonometry (Identities & Proofs)", done: false },
+      { id: "s4", time: "09:30 - 10:15 PM", label: "⚡ Night Quick Revision", subject: "science", topic: "Life Processes (Diagrams & Flowcharts)", done: false }
+    ]
+  };
+}
+
+let draggedSubject = null;
+let plannerTab = "custom"; // "custom" or "auto"
+
+window.renderCustomPlanner = function(){
+  const container = $("plannerModeContainer");
+  if(!container) return;
+
+  const slots = state.customPlan.slots || [];
+  const completedCount = slots.filter(s => s.done).length;
+
+  container.innerHTML = `
+    <div class="card mb">
+      <div class="flex spread" style="align-items:center; flex-wrap:wrap">
+        <div>
+          <h2 style="font-size:22px; font-weight:800; margin-bottom:4px">🎯 Custom Drag &amp; Drop Study Routine</h2>
+          <div class="small muted">Drag any subject or chapter into your custom time periods, or tap to assign!</div>
+        </div>
+        <div class="flex" style="gap:8px; margin-top:8px">
+          <button class="btn sm primary" onclick="showAddSlotModal()">➕ Add Time Period</button>
+          <button class="btn sm ghost" onclick="resetCustomSlots()">Reset Routine</button>
+        </div>
+      </div>
+      <div class="flex mt" style="gap:14px; margin-top:14px; align-items:center">
+        <span class="tag high">${completedCount} of ${slots.length} Completed Today</span>
+        <span class="small muted">💡 Drag cards from the subject bank or click 'Assign' to swap.</span>
+      </div>
+    </div>
+
+    <div class="dd-container">
+      <!-- Left: Subject & Chapter Palette -->
+      <div class="dd-drawer">
+        <div class="bold small" style="color:var(--cyan); margin-bottom:10px">📚 Drag Subject Into Period:</div>
+        <div class="dd-subject-chip maths" draggable="true" ondragstart="handleSubjectDragStart(event, 'maths', 'Mathematics — Formula Practice &amp; Numericals')">
+          <span>🧮</span>
+          <div style="flex:1">
+            <div>Mathematics</div>
+            <div class="tiny" style="opacity:0.8">14 Chapters · High Weightage</div>
+          </div>
+          <span style="font-size:12px">⠿</span>
+        </div>
+
+        <div class="dd-subject-chip science" draggable="true" ondragstart="handleSubjectDragStart(event, 'science', 'Science — Concepts, Reactions &amp; Diagrams')">
+          <span>🔬</span>
+          <div style="flex:1">
+            <div>Science</div>
+            <div class="tiny" style="opacity:0.8">13 Chapters · Physics/Chem/Bio</div>
+          </div>
+          <span style="font-size:12px">⠿</span>
+        </div>
+
+        <div class="dd-subject-chip" style="background:rgba(251,191,36,0.15); color:#fbbf24; border-color:rgba(251,191,36,0.35)" draggable="true" ondragstart="handleSubjectDragStart(event, 'revision', 'Mock Test &amp; PYQ Revision')">
+          <span>📝</span>
+          <div style="flex:1">
+            <div>Mock Test / PYQ</div>
+            <div class="tiny" style="opacity:0.8">Exam Simulation</div>
+          </div>
+          <span style="font-size:12px">⠿</span>
+        </div>
+
+        <div class="dd-subject-chip" style="background:rgba(168,85,247,0.15); color:#c084fc; border-color:rgba(168,85,247,0.35)" draggable="true" ondragstart="handleSubjectDragStart(event, 'practicals', 'Practicals &amp; Viva Review')">
+          <span>🧪</span>
+          <div style="flex:1">
+            <div>Practicals Kit</div>
+            <div class="tiny" style="opacity:0.8">14 Experiments &amp; Viva</div>
+          </div>
+          <span style="font-size:12px">⠿</span>
+        </div>
+
+        <div class="mt" style="margin-top:16px; padding-top:14px; border-top:1px solid var(--line)">
+          <div class="bold small" style="color:#cbd5e1; margin-bottom:8px">Quick Chapter Shortcuts:</div>
+          <select id="quickChapterAssign" class="btn" style="width:100%; font-size:12px; margin-bottom:8px" onchange="assignSelectedChapterToSlot(this.value)">
+            <option value="">Select a chapter to add...</option>
+            <optgroup label="Mathematics">
+              ${CURRICULUM.maths.chapters.map(c => `<option value="maths|${c.name}">${c.name}</option>`).join("")}
+            </optgroup>
+            <optgroup label="Science">
+              ${CURRICULUM.science.chapters.map(c => `<option value="science|${c.name}">${c.name}</option>`).join("")}
+            </optgroup>
+          </select>
+        </div>
+      </div>
+
+      <!-- Right: Custom Time Periods / Slots -->
+      <div id="ddSlotList">
+        ${slots.map((slot, idx) => `
+          <div class="dd-slot-card ${slot.topic ? 'filled' : ''}" id="slot-${slot.id}"
+               ondragover="handleSlotDragOver(event, '${slot.id}')"
+               ondragleave="handleSlotDragLeave(event, '${slot.id}')"
+               ondrop="handleSlotDrop(event, '${slot.id}')">
+            <div class="dd-slot-header">
+              <div class="dd-slot-time">
+                <span>⏰</span>
+                <span>${esc(slot.time)}</span>
+                <span class="small muted" style="font-weight:600">· ${esc(slot.label)}</span>
+              </div>
+              <div class="dd-slot-actions">
+                <button class="btn sm ${slot.done ? 'primary' : 'ghost'}" onclick="toggleSlotDone('${slot.id}')">
+                  ${slot.done ? '✓ Done (+4 XP)' : 'Mark Done'}
+                </button>
+                <button class="btn sm ghost" onclick="editSlot('${slot.id}')">✏️</button>
+                <button class="btn sm ghost" style="color:#f87171" onclick="deleteSlot('${slot.id}')">✕</button>
+              </div>
+            </div>
+
+            <div class="dd-slot-content">
+              ${slot.topic ? `
+                <div class="flex spread" style="width:100%; align-items:center; padding:10px 14px; border-radius:10px; background:${slot.subject === 'maths' ? 'rgba(79,140,255,0.12)' : slot.subject === 'science' ? 'rgba(34,211,238,0.12)' : 'rgba(251,191,36,0.12)'}; border:1px solid ${slot.subject === 'maths' ? 'rgba(79,140,255,0.3)' : slot.subject === 'science' ? 'rgba(34,211,238,0.3)' : 'rgba(251,191,36,0.3)'}">
+                  <div class="flex" style="gap:10px; align-items:center">
+                    <span style="font-size:22px">${slot.subject === 'maths' ? '🧮' : slot.subject === 'science' ? '🔬' : '📝'}</span>
+                    <div>
+                      <div class="bold" style="color:#f8fafc; font-size:14px; ${slot.done ? 'text-decoration:line-through; opacity:0.6;' : ''}">${esc(slot.topic)}</div>
+                      <div class="tiny muted">${slot.subject.toUpperCase()} · Assigned to ${esc(slot.time)}</div>
+                    </div>
+                  </div>
+                  <button class="btn sm ghost" style="padding:4px 8px; font-size:11px" onclick="clearSlotTopic('${slot.id}')">Remove</button>
+                </div>
+              ` : `
+                <div class="dd-slot-empty">
+                  📥 Drag a subject here or click to assign a chapter for this time period
+                </div>
+              `}
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+};
+
+// Drag and drop events
+window.handleSubjectDragStart = function(e, subj, topic){
+  draggedSubject = { subj, topic };
+  e.dataTransfer.setData("text/plain", JSON.stringify(draggedSubject));
+};
+
+window.handleSlotDragOver = function(e, slotId){
+  e.preventDefault();
+  const el = document.getElementById("slot-" + slotId);
+  if(el) el.classList.add("drag-over");
+};
+
+window.handleSlotDragLeave = function(e, slotId){
+  const el = document.getElementById("slot-" + slotId);
+  if(el) el.classList.remove("drag-over");
+};
+
+window.handleSlotDrop = function(e, slotId){
+  e.preventDefault();
+  const el = document.getElementById("slot-" + slotId);
+  if(el) el.classList.remove("drag-over");
+
+  let data = draggedSubject;
+  try {
+    const raw = e.dataTransfer.getData("text/plain");
+    if(raw) data = JSON.parse(raw);
+  } catch(err){}
+
+  if(!data) return;
+
+  const slot = state.customPlan.slots.find(s => s.id === slotId);
+  if(slot){
+    slot.subject = data.subj;
+    slot.topic = data.topic;
+    save();
+    renderCustomPlanner();
+    toast(`Assigned to ${slot.time} 👍`);
+  }
+};
+
+window.toggleSlotDone = function(slotId){
+  const slot = state.customPlan.slots.find(s => s.id === slotId);
+  if(!slot) return;
+  slot.done = !slot.done;
+  if(slot.done){
+    addXP(4);
+    toast("Great job! Slot completed (+4 XP) 🌟");
+  }
+  save();
+  renderCustomPlanner();
+};
+
+window.clearSlotTopic = function(slotId){
+  const slot = state.customPlan.slots.find(s => s.id === slotId);
+  if(slot){
+    slot.topic = "";
+    save();
+    renderCustomPlanner();
+    toast("Period cleared");
+  }
+};
+
+window.deleteSlot = function(slotId){
+  state.customPlan.slots = state.customPlan.slots.filter(s => s.id !== slotId);
+  save();
+  renderCustomPlanner();
+  toast("Time period removed");
+};
+
+window.resetCustomSlots = function(){
+  if(!confirm("Reset routine to default periods?")) return;
+  state.customPlan.slots = [
+    { id: "s1", time: "06:00 - 07:30 AM", label: "🌅 Early Morning Focus", subject: "maths", topic: "Quadratic Equations & AP Practice", done: false },
+    { id: "s2", time: "04:30 - 06:00 PM", label: "☀️ After School Practice", subject: "science", topic: "Chemical Reactions (Balancing & Types)", done: false },
+    { id: "s3", time: "07:30 - 09:00 PM", label: "🌙 Evening Concept Booster", subject: "maths", topic: "Trigonometry (Identities & Proofs)", done: false },
+    { id: "s4", time: "09:30 - 10:15 PM", label: "⚡ Night Quick Revision", subject: "science", topic: "Life Processes (Diagrams & Flowcharts)", done: false }
+  ];
+  save();
+  renderCustomPlanner();
+  toast("Routine reset");
+};
+
+window.showAddSlotModal = function(){
+  $("modalBox").innerHTML = `
+    <div class="close" onclick="closeModal()">✕</div>
+    <h2 style="font-size:20px; font-weight:800; margin-bottom:12px">⏰ Add Custom Study Period</h2>
+
+    <label class="small muted">Time Duration (e.g., 05:00 - 06:30 PM)</label>
+    <input id="newSlotTime" class="btn" style="color:var(--text); width:100%; margin:6px 0 14px" placeholder="05:00 - 06:30 PM">
+
+    <label class="small muted">Session Label (e.g., Physics Numericals / Evening Revision)</label>
+    <input id="newSlotLabel" class="btn" style="color:var(--text); width:100%; margin:6px 0 14px" placeholder="Session Title">
+
+    <label class="small muted">Subject</label>
+    <select id="newSlotSubject" class="btn" style="color:var(--text); width:100%; margin:6px 0 18px">
+      <option value="maths">🧮 Mathematics</option>
+      <option value="science">🔬 Science</option>
+      <option value="revision">📝 Mock Test / Revision</option>
+    </select>
+
+    <div class="flex" style="justify-content:flex-end; gap:8px">
+      <button class="btn ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" onclick="addCustomSlot()">Add Period ➜</button>
+    </div>
+  `;
+  $("modalBg").classList.add("open");
+};
+
+window.addCustomSlot = function(){
+  const time = $("newSlotTime") ? $("newSlotTime").value.trim() : "";
+  const label = $("newSlotLabel") ? $("newSlotLabel").value.trim() : "";
+  const subj = $("newSlotSubject") ? $("newSlotSubject").value : "maths";
+
+  if(!time){ toast("Please enter a time period"); return; }
+
+  const newId = "slot-" + Date.now();
+  state.customPlan.slots.push({
+    id: newId,
+    time: time,
+    label: label || "Study Session",
+    subject: subj,
+    topic: `${subj === 'maths' ? 'Mathematics' : 'Science'} Focus Study`,
+    done: false
+  });
+  save();
+  closeModal();
+  renderCustomPlanner();
+  toast("New study period added! 🎯");
+};
+
+window.assignSelectedChapterToSlot = function(val){
+  if(!val) return;
+  const [subj, name] = val.split("|");
+  // Find first empty slot, or slot 0
+  const empty = state.customPlan.slots.find(s => !s.topic) || state.customPlan.slots[0];
+  if(empty){
+    empty.subject = subj;
+    empty.topic = name + " (Self Study & Numericals)";
+    save();
+    renderCustomPlanner();
+    toast(`Assigned ${name} to ${empty.time}!`);
+  }
+};
+
+window.switchPlannerTab = function(tab, btn){
+  plannerTab = tab;
+  if(btn && btn.parentElement){
+    btn.parentElement.querySelectorAll(".cm-pill").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+  }
+  const autoDiv = document.getElementById("plannerAutoView");
+  const customDiv = document.getElementById("plannerCustomView");
+
+  if(autoDiv && customDiv){
+    if(tab === "custom"){
+      autoDiv.style.display = "none";
+      customDiv.style.display = "block";
+      renderCustomPlanner();
+    } else {
+      autoDiv.style.display = "block";
+      customDiv.style.display = "none";
+    }
+  }
+};
+
+
+// Init custom planner if on planner view
+setTimeout(() => { if(typeof renderCustomPlanner === 'function') renderCustomPlanner(); }, 500);
 </script>
 </body>
 </html>
