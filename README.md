@@ -51,3 +51,13 @@ Progress is stored in the browser's local storage on that device. Use **Settings
 - 🧪 **Practicals Kit** — all 14 Class-10 experiments with aim, theory, materials, procedure, observation, conclusion and viva Q&A.
 - ⚡ **Exam Mode v2** — choose Mixed / Maths / Science and 10 / 20 / 30-question timed mocks, with saved attempt history and rolling average.
 - 🚀 First-run onboarding (name, exam date, target score) and 🔊 read-aloud tutor replies.
+
+- 🏆 **Flagship Coaching Modules (Kota Standard)**:
+  - Complete Coaching Guides for **ALL 27 Chapters** (Maths + Science).
+  - 🎯 **2025–26 CBSE Exam Blueprints & Weightage** for every chapter.
+  - ⚠️ **Examiner Trap Alerts & Kota Hacks** (identifying where 90% of students lose marks and how to score 100/100).
+  - 🥇 **Tiered Coaching Question Bank**:
+    - **Level 1: Foundation (Concept Builders)**
+    - **Level 2: Board Target (PYQ) with Official CBSE Step-by-Step Marking Scheme**
+    - **Level 3: HOTS Challenger (Exemplar / Olympiad Level)**
+  - Full model solutions with step-by-step scoring breakdown drawers and topper tips.
