@@ -1,13 +1,13 @@
 {
-  "name": "TWS STUDIES — AI Personal Teacher",
-  "short_name": "TWS STUDIES",
-  "description": "Your personal AI teacher for CBSE Class 10 Maths & Science. Learn, practice and prepare for board exams.",
+  "name": "TWS STUDIES — Class 10 Board App",
+  "short_name": "TWS App",
+  "description": "Your complete CBSE Class 10 board exam preparation app with study plans, formulas, sample papers, flashcards, and coaching questions.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#070812",
-  "theme_color": "#070812",
+  "theme_color": "#0284c7",
   "categories": ["education", "productivity"],
   "lang": "en",
   "icons": [
