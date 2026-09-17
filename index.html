@@ -406,6 +406,7 @@ canvas{max-width:100%}
           <button class="btn sm ghost" onclick="dismissInstallBanner()">✕</button>
         </div>
       </div>
+      <div id="homeSprintBanner" style="display:none; margin-bottom:16px"></div>
       <div class="grid g2 mb">
         <div class="card">
           <h3><span class="em">🎯</span> Today's Goal</h3>
@@ -595,11 +596,16 @@ canvas{max-width:100%}
       </div>
       <div class="cm-pill-bar" style="margin-bottom:16px">
         <button class="cm-pill active" onclick="switchPlannerTab('custom', this)">✋ Drag & Drop Daily Routine</button>
+        <button class="cm-pill" onclick="switchPlannerTab('sprint', this)">⚡ Chapter Sprint Planner <span class="badge" style="background:#0284c7;color:#fff;margin-left:4px">NEW</span></button>
         <button class="cm-pill" onclick="switchPlannerTab('auto', this)">📅 Board Countdown Roadmap</button>
       </div>
 
       <div id="plannerCustomView">
         <div id="plannerModeContainer"></div>
+      </div>
+
+      <div id="plannerSprintView" style="display:none">
+        <div id="plannerSprintContainer"></div>
       </div>
 
       <div id="plannerAutoView" style="display:none">
@@ -7041,7 +7047,8 @@ window.switchView = function(viewId){
   if(viewId === 'flashcards') renderFlashcards();
   if(viewId === 'bookmarks') renderBookmarks();
   if(viewId === 'focusDesk') renderFocusDesk();
-  if(viewId === 'planner') { if(plannerTab === 'custom') renderCustomPlanner(); else renderPlanner(); }
+  if(viewId === 'planner') { if(plannerTab === 'sprint') renderSprintPlanner(); else if(plannerTab === 'custom') renderCustomPlanner(); else renderPlanner(); }
+  if(viewId === 'home') updateHomeSprintBanner();
 };
 
 // Initialise theme on boot
@@ -7643,22 +7650,412 @@ window.switchPlannerTab = function(tab, btn){
   }
   const autoDiv = document.getElementById("plannerAutoView");
   const customDiv = document.getElementById("plannerCustomView");
+  const sprintDiv = document.getElementById("plannerSprintView");
 
-  if(autoDiv && customDiv){
-    if(tab === "custom"){
-      autoDiv.style.display = "none";
-      customDiv.style.display = "block";
-      renderCustomPlanner();
-    } else {
-      autoDiv.style.display = "block";
-      customDiv.style.display = "none";
-    }
-  }
+  if(autoDiv) autoDiv.style.display = (tab === "auto") ? "block" : "none";
+  if(customDiv) customDiv.style.display = (tab === "custom") ? "block" : "none";
+  if(sprintDiv) sprintDiv.style.display = (tab === "sprint") ? "block" : "none";
+
+  if(tab === "custom") renderCustomPlanner();
+  else if(tab === "sprint") renderSprintPlanner();
+  else if(tab === "auto") renderPlanner();
 };
 
 
 // Init custom planner if on planner view
 setTimeout(() => { if(typeof renderCustomPlanner === 'function') renderCustomPlanner(); }, 500);
+
+/* ===== CHAPTER SPRINT PLANNER INJECTION ===== */
+/* ================= CHAPTER SPRINT & RAPID 1-DAY PLANNER ================= */
+
+// State initialization
+if(!state.activeSprint){
+  state.activeSprint = null; // { subject, cid, chapterName, days, dailyHours, generatedDate, tasks: [{id, day, phase, title, desc, linkAction, done}], done: {} }
+}
+
+let sprintSubject = "maths";
+
+window.renderSprintPlanner = function(){
+  const container = document.getElementById("plannerSprintContainer");
+  if(!container) return;
+
+  const sprint = state.activeSprint;
+
+  if(!sprint){
+    // Render the Sprint Builder Form
+    const chapters = CURRICULUM[sprintSubject].chapters;
+    container.innerHTML = `
+      <div class="card mb">
+        <div class="flex spread" style="align-items:center; flex-wrap:wrap">
+          <div>
+            <h2 style="font-size:22px; font-weight:800; margin-bottom:4px">⚡ Chapter Sprint &amp; Rapid Plan Generator</h2>
+            <div class="small muted">Pick a chapter, choose how many days you need, and get a tailored study sprint.</div>
+          </div>
+          <span class="tag high">Kota Fast-Track Engine</span>
+        </div>
+      </div>
+
+      <div class="card mb" style="max-width:720px; margin:0 auto">
+        <!-- Step 1: Subject Selection -->
+        <label class="small bold" style="color:var(--cyan); display:block; margin-bottom:8px">1. Select Subject:</label>
+        <div class="flex" style="gap:10px; margin-bottom:18px">
+          <button class="btn sm ${sprintSubject === 'maths' ? 'primary' : 'ghost'}" style="flex:1; justify-content:center" onclick="setSprintSubj('maths')">
+            🧮 Mathematics
+          </button>
+          <button class="btn sm ${sprintSubject === 'science' ? 'primary' : 'ghost'}" style="flex:1; justify-content:center" onclick="setSprintSubj('science')">
+            🔬 Science
+          </button>
+        </div>
+
+        <!-- Step 2: Chapter Selection -->
+        <label class="small bold" style="color:var(--cyan); display:block; margin-bottom:8px">2. Which chapter do you want to master?</label>
+        <select id="sprintChapterSelect" class="btn" style="color:var(--text); width:100%; margin-bottom:18px">
+          ${chapters.map(c => `
+            <option value="${c.id}">${esc(c.name)} (~${c.weight} marks · ${c.priority} priority)</option>
+          `).join("")}
+        </select>
+
+        <!-- Step 3: Days Required -->
+        <label class="small bold" style="color:var(--cyan); display:block; margin-bottom:8px">3. How many days do you have to finish this chapter?</label>
+        <div class="grid g2" style="gap:10px; margin-bottom:18px">
+          <div class="card" style="padding:14px; cursor:pointer; border:1px solid var(--line); border-radius:10px; transition:all 0.2s" id="opt-days-1" onclick="selectSprintDays(1)">
+            <div class="bold" style="color:#fbbf24; font-size:14px">⚡ 1 Day (Rapid One-Shot Sprint)</div>
+            <div class="small muted" style="margin-top:4px">Exam tomorrow / urgent revision. High-yield theory + guaranteed PYQs + trap alerts.</div>
+          </div>
+          <div class="card" style="padding:14px; cursor:pointer; border:1px solid var(--line); border-radius:10px; transition:all 0.2s" id="opt-days-2" onclick="selectSprintDays(2)">
+            <div class="bold" style="color:#38bdf8; font-size:14px">🎯 2 Days (Balanced Fast Track)</div>
+            <div class="small muted" style="margin-top:4px">Day 1: Concept Vault &amp; Formulas · Day 2: Board PYQs &amp; Mock Quiz.</div>
+          </div>
+          <div class="card" style="padding:14px; cursor:pointer; border:1px solid var(--line); border-radius:10px; transition:all 0.2s" id="opt-days-3" onclick="selectSprintDays(3)">
+            <div class="bold" style="color:#34d399; font-size:14px">🏆 3 Days (Kota Standard Mastery)</div>
+            <div class="small muted" style="margin-top:4px">Foundation → Target PYQs with Step Marking → Level 3 HOTS Challenger.</div>
+          </div>
+          <div class="card" style="padding:14px; cursor:pointer; border:1px solid var(--line); border-radius:10px; transition:all 0.2s" id="opt-days-5" onclick="selectSprintDays(5)">
+            <div class="bold" style="color:#c084fc; font-size:14px">📅 5 Days (Zero-to-Hero Foundation)</div>
+            <div class="small muted" style="margin-top:4px">Relaxed in-depth pace with full NCERT concepts and diagnostic speed tests.</div>
+          </div>
+        </div>
+        <input type="hidden" id="selectedSprintDays" value="1">
+
+        <!-- Step 4: Daily Study Hours -->
+        <label class="small bold" style="color:var(--cyan); display:block; margin-bottom:8px">4. Available study time per day:</label>
+        <select id="sprintHoursSelect" class="btn" style="color:var(--text); width:100%; margin-bottom:24px">
+          <option value="1.5">1.5 Hours / day (Focused)</option>
+          <option value="2.5" selected>2.5 Hours / day (Recommended)</option>
+          <option value="4.0">4+ Hours / day (Intensive Marathon)</option>
+        </select>
+
+        <button class="btn primary" style="width:100%; padding:14px; font-size:15px; font-weight:800; justify-content:center" onclick="generateChapterSprint()">
+          🚀 Generate My Custom Sprint ➜
+        </button>
+      </div>
+    `;
+    setTimeout(() => selectSprintDays(1), 50);
+  } else {
+    // Render Active Sprint Dashboard
+    renderActiveSprintDashboard(container, sprint);
+  }
+};
+
+window.setSprintSubj = function(subj){
+  sprintSubject = subj;
+  renderSprintPlanner();
+};
+
+window.selectSprintDays = function(days){
+  const elVal = document.getElementById("selectedSprintDays");
+  if(elVal) elVal.value = days;
+  [1, 2, 3, 5].forEach(d => {
+    const card = document.getElementById("opt-days-" + d);
+    if(card){
+      if(d === days){
+        card.style.borderColor = "var(--cyan)";
+        card.style.background = "rgba(56, 189, 248, 0.12)";
+      } else {
+        card.style.borderColor = "var(--line)";
+        card.style.background = "transparent";
+      }
+    }
+  });
+};
+
+window.generateChapterSprint = function(){
+  const cid = $("sprintChapterSelect").value;
+  const days = parseInt($("selectedSprintDays").value || "1", 10);
+  const hours = parseFloat($("sprintHoursSelect").value || "2.5");
+  const subj = sprintSubject;
+  const ch = findChapter(cid, subj);
+
+  if(!ch){ toast("Please select a chapter"); return; }
+
+  const tasks = buildSprintTasks(ch, subj, days, hours);
+
+  state.activeSprint = {
+    subject: subj,
+    cid: cid,
+    chapterName: ch.name,
+    weight: ch.weight,
+    priority: ch.priority,
+    days: days,
+    dailyHours: hours,
+    startDate: todayISO(),
+    tasks: tasks,
+    done: {}
+  };
+  save();
+  renderSprintPlanner();
+  toast(`⚡ ${days}-Day Sprint generated for ${ch.name}!`);
+};
+
+function buildSprintTasks(ch, subj, days, hours){
+  const tasks = [];
+  const cid = ch.id;
+
+  if(days === 1){
+    // RAPID 1-DAY SPRINT (Hour-by-hour)
+    tasks.push({
+      id: "sp-1-1", day: 1, phase: "Phase 1: Concept & Formula Sprint (40m)",
+      title: `Quick Concept Vault: ${ch.name}`,
+      desc: "Review core definitions, laws, and the high-yield concept mind-map.",
+      action: `switchView('learn');openChapter('${cid}','${subj}')`,
+      btnText: "📖 Open Concepts"
+    });
+    tasks.push({
+      id: "sp-1-2", day: 1, phase: "Phase 1: Concept & Formula Sprint (40m)",
+      title: "Formula & Reaction Vault Memorisation",
+      desc: "Memorise all formulas, units, and balanced chemical reactions for this chapter.",
+      action: `switchView('formulas');fbSetSubj('${subj}')`,
+      btnText: "📐 Formula Book"
+    });
+    tasks.push({
+      id: "sp-1-3", day: 1, phase: "Phase 2: Examiner Traps & PYQs (45m)",
+      title: "⚠️ Review Examiner Trap Alerts",
+      desc: "Learn where 90% of students lose marks and master the official CBSE scoring fixes.",
+      action: `switchView('guide');guideSubject='${subj}';renderGuide();showGuide('${cid}')`,
+      btnText: "⚠️ View Traps"
+    });
+    tasks.push({
+      id: "sp-1-4", day: 1, phase: "Phase 2: Examiner Traps & PYQs (45m)",
+      title: "🔥 Top Repeated Board Questions",
+      desc: "Attempt the most-repeated questions from the past 10 years of CBSE board exams.",
+      action: `switchView('repeated');setRepeatedSubj('${subj}')`,
+      btnText: "🔥 Repeated PYQs"
+    });
+    tasks.push({
+      id: "sp-1-5", day: 1, phase: "Phase 3: Coaching Tiered Questions (40m)",
+      title: "Level 2 (Board Target) with CBSE Step Marking",
+      desc: "Solve standard 3M & 5M board questions and review official marking breakdown drawers.",
+      action: `switchView('learn');openChapter('${cid}','${subj}')`,
+      btnText: "🏆 Tiered Questions"
+    });
+    tasks.push({
+      id: "sp-1-6", day: 1, phase: "Phase 4: Speed Diagnostic Quiz (20m)",
+      title: "10-Question Timed MCQ Self-Test",
+      desc: "Take an instant chapter quiz to test retention and lock in your sprint XP.",
+      action: `switchView('practice');setupPractice('${subj}','${cid}')`,
+      btnText: "✏️ Start Quiz"
+    });
+  } else if(days === 2){
+    // 2-DAY BALANCED SPRINT
+    tasks.push({
+      id: "sp-2-1", day: 1, phase: "Day 1: Theory & Formula Foundation",
+      title: `Concept Walkthrough: ${ch.name}`,
+      desc: "Read core chapter summary, key concepts, and technical definitions.",
+      action: `switchView('learn');openChapter('${cid}','${subj}')`,
+      btnText: "📖 Chapter Overview"
+    });
+    tasks.push({
+      id: "sp-2-2", day: 1, phase: "Day 1: Theory & Formula Foundation",
+      title: "Formula & Cheat Sheet Memorisation",
+      desc: "Write down all formulas and diagrams without notes.",
+      action: `switchView('formulas');fbSetSubj('${subj}')`,
+      btnText: "📐 Formula Book"
+    });
+    tasks.push({
+      id: "sp-2-3", day: 1, phase: "Day 1: Theory & Formula Foundation",
+      title: "Level 1: Foundation (Concept Builders)",
+      desc: "Solve direct 1-mark and 2-mark foundational questions to build speed.",
+      action: `switchView('learn');openChapter('${cid}','${subj}')`,
+      btnText: "🟢 Level 1 Questions"
+    });
+    tasks.push({
+      id: "sp-2-4", day: 2, phase: "Day 2: Board Target PYQs & Examination",
+      title: "⚠️ Examiner Traps & Kota Hacks",
+      desc: "Read common mistake warnings to avoid losing silly marks on board papers.",
+      action: `switchView('guide');guideSubject='${subj}';renderGuide();showGuide('${cid}')`,
+      btnText: "⚠️ Examiner Traps"
+    });
+    tasks.push({
+      id: "sp-2-5", day: 2, phase: "Day 2: Board Target PYQs & Examination",
+      title: "Level 2: Board Target & Step-by-Step Marking",
+      desc: "Write complete subjective answers showing Given, Formula, Working, and Units.",
+      action: `switchView('learn');openChapter('${cid}','${subj}')`,
+      btnText: "🟡 Level 2 PYQs"
+    });
+    tasks.push({
+      id: "sp-2-6", day: 2, phase: "Day 2: Board Target PYQs & Examination",
+      title: "Comprehensive Chapter Mock Test",
+      desc: "Solve chapter MCQs + Assertion-Reasoning competency questions.",
+      action: `switchView('practice');setupPractice('${subj}','${cid}')`,
+      btnText: "✏️ Chapter Mock"
+    });
+  } else if(days === 3){
+    // 3-DAY KOTA MASTERY
+    tasks.push({ id: "sp-3-1", day: 1, phase: "Day 1: NCERT Foundation & Concepts", title: "NCERT Concept Mapping", desc: "Master all core theories, diagrams, and definitions.", action: `switchView('learn');openChapter('${cid}','${subj}')`, btnText: "📖 Learn" });
+    tasks.push({ id: "sp-3-2", day: 1, phase: "Day 1: NCERT Foundation & Concepts", title: "Formula Vault & Derivations", desc: "Derive key formulas and write balanced chemical equations.", action: `switchView('formulas');fbSetSubj('${subj}')`, btnText: "📐 Formulas" });
+    tasks.push({ id: "sp-3-3", day: 2, phase: "Day 2: Board PYQs & Examiner Traps", title: "Examiner Traps & Kota Hacks", desc: "Analyze the exact reasons examiners cut marks.", action: `switchView('guide');guideSubject='${subj}';renderGuide();showGuide('${cid}')`, btnText: "⚠️ Traps" });
+    tasks.push({ id: "sp-3-4", day: 2, phase: "Day 2: Board PYQs & Examiner Traps", title: "Level 2: High-Yield Board PYQs", desc: "Master standard 3M and 5M questions with step-marking schemes.", action: `switchView('learn');openChapter('${cid}','${subj}')`, btnText: "🟡 Level 2" });
+    tasks.push({ id: "sp-3-5", day: 3, phase: "Day 3: HOTS Challenger & Simulation", title: "Level 3: HOTS Challenger Questions", desc: "Attempt high-order multi-concept challenge problems.", action: `switchView('learn');openChapter('${cid}','${subj}')`, btnText: "🔴 Level 3" });
+    tasks.push({ id: "sp-3-6", day: 3, phase: "Day 3: HOTS Challenger & Simulation", title: "Full Chapter Timed Assessment", desc: "Test speed, accuracy, and review weak areas.", action: `switchView('practice');setupPractice('${subj}','${cid}')`, btnText: "✏️ Test" });
+  } else {
+    // 5-DAY DEEP PACING
+    tasks.push({ id: "sp-5-1", day: 1, phase: "Day 1: Core Concepts", title: "NCERT Concept Walkthrough", desc: "Thorough review of chapter fundamentals.", action: `switchView('learn');openChapter('${cid}','${subj}')`, btnText: "📖 Start" });
+    tasks.push({ id: "sp-5-2", day: 2, phase: "Day 2: Formulas & Diagrams", title: "Formula Bank & Diagrams", desc: "Practice ray diagrams, biological drawings, or mensuration formulas.", action: `switchView('formulas');fbSetSubj('${subj}')`, btnText: "📐 Formulas" });
+    tasks.push({ id: "sp-5-3", day: 3, phase: "Day 3: Foundation Drills", title: "Level 1 Foundation Questions", desc: "Solve 1-mark and 2-mark questions.", action: `switchView('learn');openChapter('${cid}','${subj}')`, btnText: "🟢 Level 1" });
+    tasks.push({ id: "sp-5-4", day: 4, phase: "Day 4: Board Target PYQs", title: "Level 2 Board PYQs & Traps", desc: "Learn step-marking rubrics and avoid examiner traps.", action: `switchView('learn');openChapter('${cid}','${subj}')`, btnText: "🟡 Level 2" });
+    tasks.push({ id: "sp-5-5", day: 5, phase: "Day 5: HOTS & Speed Test", title: "Level 3 HOTS + Chapter Mock", desc: "Solve complex application questions and take the final timed test.", action: `switchView('practice');setupPractice('${subj}','${cid}')`, btnText: "🔴 Level 3" });
+  }
+
+  return tasks;
+}
+
+function renderActiveSprintDashboard(container, sprint){
+  const doneCount = Object.keys(sprint.done || {}).length;
+  const totalCount = sprint.tasks.length;
+  const pct = Math.round((doneCount / totalCount) * 100);
+
+  // Group tasks by phase or day
+  let currentGroup = "";
+  let taskHtml = "";
+
+  sprint.tasks.forEach(t => {
+    const isDone = !!sprint.done[t.id];
+    if(t.phase !== currentGroup){
+      currentGroup = t.phase;
+      taskHtml += `<div class="bold small" style="color:var(--cyan); margin:18px 0 8px; text-transform:uppercase; letter-spacing:0.04em">${esc(currentGroup)}</div>`;
+    }
+    taskHtml += `
+      <div class="card mb flex spread" style="align-items:center; padding:12px 16px; margin-bottom:8px; border-left:3px solid ${isDone ? '#10b981' : 'var(--cyan)'}; flex-wrap:wrap; gap:10px">
+        <div class="flex" style="gap:12px; align-items:center; flex:1; min-width:260px">
+          <input type="checkbox" style="width:20px; height:20px; cursor:pointer; accent-color:#10b981" ${isDone ? 'checked' : ''} onchange="toggleSprintTask('${t.id}')">
+          <div>
+            <div class="bold" style="font-size:14px; color:#f8fafc; ${isDone ? 'text-decoration:line-through; opacity:0.6;' : ''}">${esc(t.title)}</div>
+            <div class="small muted" style="margin-top:2px">${esc(t.desc)}</div>
+          </div>
+        </div>
+        <div class="flex" style="gap:8px">
+          <button class="btn sm ${isDone ? 'ghost' : 'primary'}" onclick="${t.action}">${esc(t.btnText)} ➜</button>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = `
+    <div class="card mb">
+      <div class="flex spread" style="align-items:center; flex-wrap:wrap">
+        <div>
+          <span class="tag ${sprint.subject}">
+            ${sprint.subject === 'maths' ? '🧮 Mathematics' : '🔬 Science'} · ${sprint.days}-Day Sprint
+          </span>
+          <h2 style="font-size:24px; font-weight:800; margin:8px 0 4px">${esc(sprint.chapterName)}</h2>
+          <div class="small muted">~${sprint.weight} marks · ${sprint.dailyHours} hours/day · Started ${prettyDate(sprint.startDate)}</div>
+        </div>
+        <div class="flex" style="gap:14px; align-items:center; margin-top:8px">
+          ${ring(pct, pct === 100 ? "#10b981" : "var(--cyan)", 78)}
+          <div>
+            <div class="bold" style="font-size:18px; color:#f8fafc">${pct}% Done</div>
+            <div class="tiny muted">${doneCount} of ${totalCount} tasks completed</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex mt" style="gap:8px; margin-top:14px">
+        <button class="btn sm ghost" style="color:#f87171" onclick="clearActiveSprint()">Cancel / New Sprint</button>
+        <button class="btn sm ghost" onclick="window.print()">🖨️ Print Sprint</button>
+      </div>
+    </div>
+
+    <div class="card mb">
+      <div class="flex spread" style="align-items:center">
+        <h3><span class="em">📋</span> Sprint Action Checklist</h3>
+        <span class="small muted">Tick items off as you finish to earn XP!</span>
+      </div>
+      ${taskHtml}
+    </div>
+  `;
+}
+
+window.toggleSprintTask = function(taskId){
+  if(!state.activeSprint) return;
+  if(!state.activeSprint.done) state.activeSprint.done = {};
+
+  const wasDone = !!state.activeSprint.done[taskId];
+  if(wasDone){
+    delete state.activeSprint.done[taskId];
+    toast("Task unchecked");
+  } else {
+    state.activeSprint.done[taskId] = true;
+    addXP(4);
+    toast("Task complete! +4 XP 🌟");
+
+    // Check if entire sprint is done
+    const doneCount = Object.keys(state.activeSprint.done).length;
+    if(doneCount === state.activeSprint.tasks.length){
+      addXP(15);
+      toast("🎉 SPRINT FINISHED! You conquered this chapter! (+15 Bonus XP)");
+    }
+  }
+  save();
+  renderSprintPlanner();
+  updateHomeSprintBanner();
+};
+
+window.clearActiveSprint = function(){
+  if(!confirm("Are you sure you want to end this chapter sprint and start a new one?")) return;
+  state.activeSprint = null;
+  save();
+  renderSprintPlanner();
+  updateHomeSprintBanner();
+  toast("Sprint cleared. Ready for your next chapter!");
+};
+
+// Home Widget for Active Sprint
+window.updateHomeSprintBanner = function(){
+  const homeBanner = document.getElementById("homeSprintBanner");
+  if(!homeBanner) return;
+
+  const sprint = state.activeSprint;
+  if(!sprint){
+    homeBanner.style.display = "none";
+    return;
+  }
+
+  const doneCount = Object.keys(sprint.done || {}).length;
+  const totalCount = sprint.tasks.length;
+  const pct = Math.round((doneCount / totalCount) * 100);
+
+  homeBanner.style.display = "block";
+  homeBanner.innerHTML = `
+    <div class="card mb flex spread" style="align-items:center; background:linear-gradient(135deg, rgba(56,189,248,0.15), rgba(99,102,241,0.15)); border:1px solid rgba(56,189,248,0.35); flex-wrap:wrap; gap:12px">
+      <div class="flex" style="gap:12px; align-items:center">
+        <div style="font-size:32px">⚡</div>
+        <div>
+          <div class="bold" style="font-size:15px; color:#f8fafc">Active Sprint: ${esc(sprint.chapterName)} (${sprint.days} Day${sprint.days > 1 ? 's' : ''})</div>
+          <div class="small muted">${doneCount} of ${totalCount} tasks completed (${pct}%) · ${sprint.dailyHours} hrs/day</div>
+        </div>
+      </div>
+      <div class="flex" style="gap:8px">
+        <button class="btn sm primary" onclick="switchView('planner');switchPlannerTab('sprint', document.querySelectorAll('#view-planner .cm-pill')[1])">
+          Resume Sprint ➜
+        </button>
+      </div>
+    </div>
+  `;
+};
+
+
+// Init sprint banner
+setTimeout(() => { if(typeof updateHomeSprintBanner === 'function') updateHomeSprintBanner(); }, 600);
 </script>
 </body>
 </html>
